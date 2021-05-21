@@ -8,6 +8,9 @@ import {
   SET_IS_LOADING,
   SET_SELECTING,
   SET_MOUSE_DOWN,
+  KeyAction,
+  SET_KEY,
+  SET_SELECTED_COUNT,
 } from '../types';
 
 const defaultBoardState: Cell[] = [];
@@ -15,6 +18,11 @@ const defaultGeneralState = {
   isLoading: true,
   mouseDown: false,
   selecting: null,
+  selectedCount: 0,
+};
+const defaultKeyState = {
+  shift: false,
+  ctrl: false,
 };
 
 const generalReducer = (state = defaultGeneralState, action: GeneralAction) => {
@@ -25,6 +33,17 @@ const generalReducer = (state = defaultGeneralState, action: GeneralAction) => {
       return { ...state, selecting: action.selecting };
     case SET_MOUSE_DOWN:
       return { ...state, mouseDown: action.mouseDown };
+    case SET_SELECTED_COUNT:
+      return { ...state, selectedCount: action.selectedCount };
+    default:
+      return state;
+  }
+};
+
+const keysReducer = (state = defaultKeyState, action: KeyAction) => {
+  switch (action.type) {
+    case SET_KEY:
+      return { ...state, ...action.payload };
     default:
       return state;
   }
@@ -44,4 +63,5 @@ const boardReducer = (state = defaultBoardState, action: BoardAction) => {
 export default combineReducers({
   board: boardReducer,
   general: generalReducer,
+  keys: keysReducer,
 });

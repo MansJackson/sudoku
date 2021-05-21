@@ -1,7 +1,13 @@
 import { Dispatch } from 'redux';
 import data from '../pussles.json';
 import {
-  Cell, SET_IS_LOADING, SET_PUSSLE, SET_SELECTING, SET_MOUSE_DOWN,
+  Cell,
+  SET_IS_LOADING,
+  SET_PUSSLE,
+  SET_SELECTING,
+  SET_MOUSE_DOWN,
+  SET_KEY,
+  SET_SELECTED_COUNT,
 } from '../types';
 
 export const loadPussleA = () => (dispatch: Dispatch): void => {
@@ -51,5 +57,19 @@ export const setMouseDownA = (payload: boolean) => (dispatch: Dispatch): void =>
   dispatch({
     type: SET_MOUSE_DOWN,
     mouseDown: payload,
+  });
+};
+
+export const setKeyA = (payload: Record<string, boolean>) => (dispatch: Dispatch): void => {
+  dispatch({
+    type: SET_KEY,
+    payload,
+  });
+};
+
+export const setSelectedCountA = (payload: number) => (dispatch: Dispatch): void => {
+  dispatch({
+    type: SET_SELECTED_COUNT,
+    selectedCount: payload,
   });
 };

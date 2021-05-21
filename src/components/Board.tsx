@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import '../styles/Board.css';
-import { loadPussleA, setIsLoadingA } from '../redux/actions';
+import {
+  loadPussleA, setIsLoadingA, setKeyA,
+} from '../redux/actions';
 import { BoardProps, RootState } from '../types';
 import Cell from './Cell';
 
@@ -9,9 +11,43 @@ const Board = (props: BoardProps): JSX.Element => {
   const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
   const {
     isLoading,
+    keys,
     loadPussle,
     setIsLoading,
+    setKey,
   } = props;
+
+  useEffect(() => {
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'Shift') setKey({ shift: false });
+      if (e.key === 'Control') setKey({ ctrl: false });
+      if (e.key === 'Meta') setKey({ meta: false });
+    });
+
+    return (
+      document.removeEventListener('keyup', (e) => {
+        if (e.key === 'Shift') setKey({ shift: false });
+        if (e.key === 'Control') setKey({ ctrl: false });
+        if (e.key === 'Meta') setKey({ meta: false });
+      })
+    );
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Shift') if (!keys.shift) setKey({ shift: true });
+      if (e.key === 'Control') if (!keys.ctrl) setKey({ ctrl: true });
+      if (e.key === 'Meta') if (!keys.ctrl) setKey({ meta: true });
+    });
+
+    return (
+      document.removeEventListener('keydown', (e) => {
+        if (e.key === 'Shift') if (!keys.shift) setKey({ shift: true });
+        if (e.key === 'Control') if (!keys.ctrl) setKey({ ctrl: true });
+        if (e.key === 'Meta') if (!keys.ctrl) setKey({ meta: true });
+      })
+    );
+  });
 
   useEffect(() => {
     loadPussle();
@@ -43,9 +79,11 @@ const Board = (props: BoardProps): JSX.Element => {
 const mapStateToProps = (state: RootState) => ({
   board: state.board,
   isLoading: state.general.isLoading,
+  keys: state.keys,
 });
 
 export default connect(mapStateToProps, {
   loadPussle: loadPussleA,
   setIsLoading: setIsLoadingA,
+  setKey: setKeyA,
 })(Board);
