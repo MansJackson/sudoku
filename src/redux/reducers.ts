@@ -6,6 +6,8 @@ import {
   SET_PUSSLE,
   GeneralAction,
   SET_IS_LOADING,
+  SET_SELECTING,
+  SET_MOUSE_DOWN,
 } from '../types';
 
 const defaultBoardState: Cell[] = [];
@@ -19,6 +21,10 @@ const generalReducer = (state = defaultGeneralState, action: GeneralAction) => {
   switch (action.type) {
     case SET_IS_LOADING:
       return { ...state, isLoading: action.isLoading };
+    case SET_SELECTING:
+      return { ...state, selecting: action.selecting };
+    case SET_MOUSE_DOWN:
+      return { ...state, mouseDown: action.mouseDown };
     default:
       return state;
   }
