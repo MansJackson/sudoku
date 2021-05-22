@@ -1,17 +1,12 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import '../styles/Home.css';
 import Board from '../components/Board';
-import { HomeProps, RootState } from '../types';
+import { HomeProps } from '../types';
 
-const Home: React.FunctionComponent<HomeProps> = (props: HomeProps): JSX.Element => (
+const Home: React.FunctionComponent<HomeProps> = (): JSX.Element => (
   <div className="home">
     <Board />
   </div>
 );
 
-const mapStateToProps = (state: RootState) => ({
-
-});
-
-export default connect(mapStateToProps, {})(Home);
+export default Home;

@@ -9,6 +9,7 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
   const {
     id,
     board,
+    index,
     selecting,
     mouseDown,
     keys,
@@ -70,6 +71,16 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
     setMouseDown(false);
   };
 
+  const renderCellContent = () => {
+    if (content?.bigNum) return <div className={`big_num ${content.locked ? 'locked' : ''}`}>{content.bigNum}</div>;
+    if (content?.centerPencil.length) return <div className="center_pencil">{content.centerPencil}</div>;
+    if (content?.cornerPencil.length) {
+      const mapped = content.cornerPencil.map((el, i) => <div key={el} className={`corner_${i}`}>{el}</div>);
+      return <div className="corner_pencil">{mapped}</div>;
+    }
+    return '';
+  };
+
   return (
     <div
       onMouseEnter={handleMouseOver}
@@ -77,8 +88,9 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
       onMouseDown={handleMouseDown}
       className={`cell ${content?.locked ? 'locked' : ''}`}
       id={id}
+      tabIndex={index}
     >
-      {content?.bigNum !== '' ? content?.bigNum : ''}
+      {renderCellContent()}
     </div>
   );
 };
@@ -86,6 +98,7 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
 const mapStateToProps = (state: RootState, ownProps: CellOwnProps) => ({
   board: state.board,
   id: ownProps.id,
+  index: ownProps.index,
   selecting: state.general.selecting,
   mouseDown: state.general.mouseDown,
   keys: state.keys,

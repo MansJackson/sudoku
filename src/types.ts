@@ -21,6 +21,10 @@ export type BoardProps = {
   setIsLoading: (isLoading: boolean) => void;
   loadPussle: () => void;
   setKey: (payload: Record<string, boolean>) => void;
+  setCornerPencil: (cellId: string, number: string) => void;
+  setCenterPencil: (cellId: string, number: string) => void;
+  setBigNum: (cellId: string, number: string) => void;
+  clearCell: (cellId: string) => void;
 };
 
 export type CellProps = {
@@ -36,12 +40,15 @@ export type CellProps = {
 
 export type CellOwnProps = {
   id: string;
+  index: number;
 };
 
 // ACTION
 export type BoardAction = {
   type: string;
-  payload: Cell[];
+  cell: Cell[];
+  cellId: string;
+  number: string;
 };
 
 export type GeneralAction = {
@@ -77,3 +84,7 @@ export const SET_SELECTING = 'SET_SELECTING';
 export const SET_MOUSE_DOWN = 'SET_MOUSE_DOWN';
 export const SET_KEY = 'SET_KEY';
 export const SET_SELECTED_COUNT = 'SET_SELECTED_COUNT';
+export const SET_CORNER_PENCIL = 'SET_CORNER_PENCIL';
+export const SET_CENTER_PENCIL = 'SET_CENTER_PENCIL';
+export const SET_BIG_NUM = 'SET_BIG_NUM';
+export const CLEAR_CELL = 'CLEAR_CELL';

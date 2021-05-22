@@ -8,6 +8,10 @@ import {
   SET_MOUSE_DOWN,
   SET_KEY,
   SET_SELECTED_COUNT,
+  SET_CORNER_PENCIL,
+  SET_CENTER_PENCIL,
+  SET_BIG_NUM,
+  CLEAR_CELL,
 } from '../types';
 
 export const loadPussleA = () => (dispatch: Dispatch): void => {
@@ -35,7 +39,7 @@ export const loadPussleA = () => (dispatch: Dispatch): void => {
 
   dispatch({
     type: SET_PUSSLE,
-    payload: setup,
+    cell: setup,
   });
 };
 
@@ -71,5 +75,36 @@ export const setSelectedCountA = (payload: number) => (dispatch: Dispatch): void
   dispatch({
     type: SET_SELECTED_COUNT,
     selectedCount: payload,
+  });
+};
+
+export const setCornerPencilA = (cellId: string, number: string) => (dispatch: Dispatch): void => {
+  dispatch({
+    type: SET_CORNER_PENCIL,
+    cellId,
+    number,
+  });
+};
+
+export const setCenterPencilA = (cellId: string, number: string) => (dispatch: Dispatch): void => {
+  dispatch({
+    type: SET_CENTER_PENCIL,
+    cellId,
+    number,
+  });
+};
+
+export const setBigNumA = (cellId: string, number: string) => (dispatch: Dispatch): void => {
+  dispatch({
+    type: SET_BIG_NUM,
+    cellId,
+    number,
+  });
+};
+
+export const clearCellA = (cellId: string) => (dispatch: Dispatch): void => {
+  dispatch({
+    type: CLEAR_CELL,
+    cellId,
   });
 };
