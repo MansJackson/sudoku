@@ -1,6 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { setMouseDownA, setSelectedCountA, setSelectingA } from '../redux/actions';
+import {
+  clearRestrictedCellsA,
+  setMouseDownA,
+  setRestrictedCellsA,
+  setSelectingA,
+  updateSelectedCellsA,
+} from '../redux/actions';
 import { CellOwnProps, CellProps, RootState } from '../types';
 
 const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
@@ -13,12 +19,21 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
     selecting,
     mouseDown,
     keys,
-    selectedCount,
+    selectedCells,
+    restrictedCells,
     setSelecting,
     setMouseDown,
-    setSelectedCount,
+    updateSelectedCells,
   } = props;
   const content = board.find((el) => el.id === id);
+  const [restricted, setRestricted] = useState(false);
+
+  // if this cell is in restriced cells array, set local state to true
+  useEffect(() => {
+    if (restrictedCells && restrictedCells.includes(content!.id) && !restricted) {
+      setRestricted(true);
+    } else if (restricted) setRestricted(false);
+  }, [restrictedCells]);
 
   const handleMouseOver = (e: React.MouseEvent<HTMLDivElement>) => {
     const classes = e.currentTarget.classList;
@@ -26,11 +41,12 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
       if (selecting === true) {
         if (!classes.contains('selected')) {
           classes.add('selected');
-          setSelectedCount(selectedCount + 1);
+          updateSelectedCells();
         }
       } else if (selecting === false) {
         if (classes.contains('selected')) {
           classes.remove('selected');
+          updateSelectedCells();
         }
       }
     }
@@ -38,31 +54,28 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     const classes = e.currentTarget.classList;
-    let count = selectedCount;
+    const count = selectedCells.length;
 
+    // If the shift key is not held down => clear selections
     if (!keys.shift) {
-      if (selectedCount === 1 && classes.contains('selected')) {
+      if (count === 1 && classes.contains('selected')) {
         classes.remove('selected');
-        setSelectedCount(0);
         return;
       }
       document.querySelectorAll('.cell').forEach((el) => {
         if (el.classList.contains('selected')) el.classList.remove('selected');
       });
-      setSelectedCount(0);
-      count = 0;
     }
 
+    // Removes or adds 'selected' to the clicked cell
     if (classes.contains('selected')) {
       classes.remove('selected');
-      setSelectedCount(count - 1);
       setSelecting(false);
     } else {
       classes.add('selected');
-      setSelectedCount(count + 1);
       setSelecting(true);
     }
-
+    updateSelectedCells();
     setMouseDown(true);
   };
 
@@ -86,7 +99,7 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
       onMouseEnter={handleMouseOver}
       onMouseUp={handleMouseUp}
       onMouseDown={handleMouseDown}
-      className={`cell ${content?.locked ? 'locked' : ''}`}
+      className={`cell ${content?.locked ? 'locked' : ''} ${restricted ? 'restricted' : ''}`}
       id={id}
       tabIndex={index}
     >
@@ -102,11 +115,14 @@ const mapStateToProps = (state: RootState, ownProps: CellOwnProps) => ({
   selecting: state.general.selecting,
   mouseDown: state.general.mouseDown,
   keys: state.keys,
-  selectedCount: state.general.selectedCount,
+  selectedCells: state.general.selectedCells,
+  restrictedCells: state.general.restrictedCells,
 });
 
 export default connect(mapStateToProps, {
   setSelecting: setSelectingA,
   setMouseDown: setMouseDownA,
-  setSelectedCount: setSelectedCountA,
+  updateSelectedCells: updateSelectedCellsA,
+  setRestrictedCells: setRestrictedCellsA,
+  clearRestrictedCells: clearRestrictedCellsA,
 })(Cell);

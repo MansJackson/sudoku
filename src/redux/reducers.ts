@@ -15,6 +15,9 @@ import {
   SET_CENTER_PENCIL,
   SET_BIG_NUM,
   CLEAR_CELL,
+  SET_RESTRICTED_CELLS,
+  CLEAR_RESTRICTED_CELLS,
+  SET_SELECTED_CELLS,
 } from '../types';
 import { isValidNumber } from '../utils';
 
@@ -24,6 +27,8 @@ const defaultGeneralState = {
   mouseDown: false,
   selecting: null,
   selectedCount: 0,
+  restrictedCells: [],
+  selectedCells: [],
 };
 const defaultKeyState = {
   shift: false,
@@ -41,6 +46,12 @@ const generalReducer = (state = defaultGeneralState, action: GeneralAction) => {
       return { ...state, mouseDown: action.mouseDown };
     case SET_SELECTED_COUNT:
       return { ...state, selectedCount: action.selectedCount };
+    case SET_RESTRICTED_CELLS:
+      return { ...state, restrictedCells: action.restrictedCells };
+    case CLEAR_RESTRICTED_CELLS:
+      return { ...state, restrictedCells: action.restrictedCells };
+    case SET_SELECTED_CELLS:
+      return { ...state, selectedCells: action.selectedCells };
     default:
       return state;
   }

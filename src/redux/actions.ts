@@ -12,7 +12,11 @@ import {
   SET_CENTER_PENCIL,
   SET_BIG_NUM,
   CLEAR_CELL,
+  SET_RESTRICTED_CELLS,
+  CLEAR_RESTRICTED_CELLS,
+  SET_SELECTED_CELLS,
 } from '../types';
+import { findRestrictedCells } from '../utils';
 
 export const loadPussleA = () => (dispatch: Dispatch): void => {
   const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
@@ -106,5 +110,34 @@ export const clearCellA = (cellId: string) => (dispatch: Dispatch): void => {
   dispatch({
     type: CLEAR_CELL,
     cellId,
+  });
+};
+
+export const setRestrictedCellsA = (cellId: string) => (dispatch: Dispatch): void => {
+  const restrictedCells = findRestrictedCells(cellId);
+  dispatch({
+    type: SET_RESTRICTED_CELLS,
+    restrictedCells,
+  });
+};
+
+export const clearRestrictedCellsA = () => (dispatch: Dispatch): void => {
+  dispatch({
+    type: CLEAR_RESTRICTED_CELLS,
+  });
+};
+
+export const updateSelectedCellsA = () => (dispatch: Dispatch): void => {
+  const cells = document.querySelectorAll('.selected');
+  let selected: string[] = [];
+
+  cells.forEach((el) => {
+    if (el.classList.contains('selected')) selected = [...selected, el.id];
+  });
+
+  console.log(selected);
+  dispatch({
+    type: SET_SELECTED_CELLS,
+    selectedCells: selected,
   });
 };

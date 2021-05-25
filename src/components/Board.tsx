@@ -3,16 +3,25 @@ import { connect } from 'react-redux';
 import '../styles/Board.css';
 import {
   clearCellA,
-  loadPussleA, setBigNumA, setCenterPencilA, setCornerPencilA, setIsLoadingA, setKeyA,
+  clearRestrictedCellsA,
+  loadPussleA,
+  setBigNumA,
+  setCenterPencilA,
+  setCornerPencilA,
+  setIsLoadingA,
+  setKeyA,
+  setRestrictedCellsA,
 } from '../redux/actions';
 import { BoardProps, RootState } from '../types';
 import Cell from './Cell';
+import { convertShiftNumber } from '../utils';
 
 const Board = (props: BoardProps): JSX.Element => {
   const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
   const {
     isLoading,
     keys,
+    selectedCells,
     loadPussle,
     setIsLoading,
     setKey,
@@ -20,8 +29,11 @@ const Board = (props: BoardProps): JSX.Element => {
     setCornerPencil,
     setCenterPencil,
     clearCell,
+    setRestrictedCells,
+    clearRestrictedCells,
   } = props;
 
+  // KeyUp Event Listener
   useEffect(() => {
     document.addEventListener('keyup', (e) => {
       if (e.key === 'Shift') setKey({ shift: false });
@@ -38,6 +50,7 @@ const Board = (props: BoardProps): JSX.Element => {
     );
   }, []);
 
+  // KeyDown Event Listener
   useEffect(() => {
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Shift') if (!keys.shift) setKey({ shift: true });
@@ -52,27 +65,19 @@ const Board = (props: BoardProps): JSX.Element => {
         if (e.key === 'Meta') if (!keys.ctrl) setKey({ meta: true });
       })
     );
-  });
+  }, []);
 
+  // LoadPussle
   useEffect(() => {
     loadPussle();
     setIsLoading(false);
   }, []);
 
-  const convertShiftNumber = (input: string): string | false => {
-    switch (input) {
-      case '!': return '1';
-      case '"': return '2';
-      case '#': return '3';
-      case '€': return '4';
-      case '%': return '5';
-      case '&': return '6';
-      case '/': return '7';
-      case '(': return '8';
-      case ')': return '9';
-      default: return false;
-    }
-  };
+  // update restricted cells
+  useEffect(() => {
+    if (selectedCells.length === 1) setRestrictedCells(selectedCells[0]);
+    else clearRestrictedCells();
+  }, [selectedCells]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     const cells = document.querySelectorAll('.cell');
@@ -133,6 +138,7 @@ const mapStateToProps = (state: RootState) => ({
   board: state.board,
   isLoading: state.general.isLoading,
   keys: state.keys,
+  selectedCells: state.general.selectedCells,
 });
 
 export default connect(mapStateToProps, {
@@ -143,4 +149,6 @@ export default connect(mapStateToProps, {
   setCenterPencil: setCenterPencilA,
   setBigNum: setBigNumA,
   clearCell: clearCellA,
+  setRestrictedCells: setRestrictedCellsA,
+  clearRestrictedCells: clearRestrictedCellsA,
 })(Board);

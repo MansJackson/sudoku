@@ -5,6 +5,8 @@ export type RootState = {
     selecting: boolean | null;
     mouseDown: boolean;
     selectedCount: number;
+    restrictedCells: string[];
+    selectedCells: string[];
   }
   keys: Record<string, boolean>
 };
@@ -18,6 +20,7 @@ export type BoardProps = {
   board: Cell[];
   isLoading: boolean;
   keys: Record<string, boolean>
+  selectedCells: string[];
   setIsLoading: (isLoading: boolean) => void;
   loadPussle: () => void;
   setKey: (payload: Record<string, boolean>) => void;
@@ -25,6 +28,8 @@ export type BoardProps = {
   setCenterPencil: (cellId: string, number: string) => void;
   setBigNum: (cellId: string, number: string) => void;
   clearCell: (cellId: string) => void;
+  setRestrictedCells: (cellId: string) => void;
+  clearRestrictedCells: () => void;
 };
 
 export type CellProps = {
@@ -32,10 +37,11 @@ export type CellProps = {
   selecting: boolean | null;
   mouseDown: boolean;
   keys: Record<string, boolean>;
-  selectedCount: number;
+  selectedCells: string[];
+  restrictedCells: string[];
   setSelecting: (payload: boolean | null) => void;
   setMouseDown: (payload: boolean) => void;
-  setSelectedCount: (payload: number) => void;
+  updateSelectedCells: () => void;
 };
 
 export type CellOwnProps = {
@@ -57,6 +63,8 @@ export type GeneralAction = {
   selecting: boolean | null;
   mouseDown: boolean;
   selectedCount: number;
+  restrictedCells: string[];
+  selectedCells: string[];
 };
 
 export type KeyAction = {
@@ -88,3 +96,6 @@ export const SET_CORNER_PENCIL = 'SET_CORNER_PENCIL';
 export const SET_CENTER_PENCIL = 'SET_CENTER_PENCIL';
 export const SET_BIG_NUM = 'SET_BIG_NUM';
 export const CLEAR_CELL = 'CLEAR_CELL';
+export const CLEAR_RESTRICTED_CELLS = 'CLEAR_RESTRICTED_CELLS';
+export const SET_RESTRICTED_CELLS = 'SET_RESTRICTED_CELLS';
+export const SET_SELECTED_CELLS = 'SET_SELECTED_CELLS';

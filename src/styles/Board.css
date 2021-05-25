@@ -117,7 +117,11 @@
 }
 
 .selected {
-  background-color: khaki;
+  background-color: rgba(98, 199, 224, 0.603);
+}
+
+.restricted {
+  background-color: rgba(140, 220, 240, 0.39);;
 }
 
 .cell:nth-child(3n) {
