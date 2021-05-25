@@ -9,7 +9,6 @@ export const findRestrictedCells = (cellId: string): string[] => {
   let boxColumns: string[] = [];
   let cells: string[] = [];
   const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
-  console.log(cellId);
 
   if (row <= 3) boxRows = ['1', '2', '3'];
   else if (row <= 6) boxRows = ['4', '5', '6'];

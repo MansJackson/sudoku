@@ -27,18 +27,26 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
   } = props;
   const content = board.find((el) => el.id === id);
   const [restricted, setRestricted] = useState(false);
+  const [selected, setSelected] = useState(false);
 
   // if this cell is in restriced cells array, set local state to true
   useEffect(() => {
-    if (restrictedCells && restrictedCells.includes(content!.id) && !restricted) {
+    if (restrictedCells && restrictedCells.includes(content!.id)) {
       setRestricted(true);
     } else if (restricted) setRestricted(false);
   }, [restrictedCells]);
 
+  // If this cell is in selected array, set local state to true
+  useEffect(() => {
+    if (selectedCells && selectedCells.includes(content!.id)) {
+      setSelected(true);
+    } else if (selected) setSelected(false);
+  }, [selectedCells]);
+
   const handleMouseOver = (e: React.MouseEvent<HTMLDivElement>) => {
     const classes = e.currentTarget.classList;
     if (mouseDown) {
-      if (selecting === true) {
+      if (selecting) {
         if (!classes.contains('selected')) {
           classes.add('selected');
           updateSelectedCells();
@@ -53,6 +61,7 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.nativeEvent.button !== 0) return;
     const classes = e.currentTarget.classList;
     const count = selectedCells.length;
 
@@ -60,6 +69,7 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
     if (!keys.shift) {
       if (count === 1 && classes.contains('selected')) {
         classes.remove('selected');
+        updateSelectedCells();
         return;
       }
       document.querySelectorAll('.cell').forEach((el) => {
@@ -99,7 +109,7 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
       onMouseEnter={handleMouseOver}
       onMouseUp={handleMouseUp}
       onMouseDown={handleMouseDown}
-      className={`cell ${content?.locked ? 'locked' : ''} ${restricted ? 'restricted' : ''}`}
+      className={`cell ${content?.locked ? 'locked' : ''} ${restricted ? 'restricted' : ''} ${selected ? 'selected' : ''}`}
       id={id}
       tabIndex={index}
     >

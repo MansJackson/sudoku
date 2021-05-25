@@ -135,7 +135,6 @@ export const updateSelectedCellsA = () => (dispatch: Dispatch): void => {
     if (el.classList.contains('selected')) selected = [...selected, el.id];
   });
 
-  console.log(selected);
   dispatch({
     type: SET_SELECTED_CELLS,
     selectedCells: selected,
