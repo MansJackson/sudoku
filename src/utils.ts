@@ -65,3 +65,43 @@ export const convertNumLockShift = (input: string): string | false => {
     default: return false;
   }
 };
+
+export const isPussleSolved = (pussle: string[]): boolean => {
+  let row: string[] = [];
+  let column: string[] = [];
+  let box: string[] = [];
+
+  // Check rows and columns
+  // for (let x = 0; x < 9; x += 1) {
+  //   row = [];
+  //   column = [];
+  //   for (let y = 0; y < 9; y += 1) {
+  //     row = [...row, pussle[y + x * 9]];
+  //     column = [...column, pussle[x + y * 9]];
+  //   }
+  //   console.log(column);
+  //   if (row.sort().join('') !== '123456789') return false;
+  //   if (column.sort().join('') !== '123456789') return false;
+  // }
+
+  // Check Box
+  for (let i = 0; i < 3; i += 1) {
+    for (let x = 0; x < 3; x += 1) {
+      row = [];
+      column = [];
+      box = [];
+      for (let y = 0; y < 3; y += 1) {
+        for (let z = 0; z < 3; z += 1) {
+          row = [...row, pussle[(y * 3 + z) + ((i * 3 + x) * 9)]];
+          column = [...column, pussle[(i * 3 + x) + ((y * 3 + z) * 9)]];
+          box = [...box, pussle[i * 27 + x * 3 + y * 9 + z]];
+        }
+      }
+      if (row.sort().join('') !== '123456789') return false;
+      if (column.sort().join('') !== '123456789') return false;
+      if (box.sort().join('') !== '123456789') return false;
+    }
+  }
+
+  return true;
+};

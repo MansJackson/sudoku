@@ -14,7 +14,7 @@ import {
 } from '../redux/actions';
 import { BoardProps, RootState } from '../types';
 import Cell from './Cell';
-import { convertNumLockShift, convertShiftNumber } from '../utils';
+import { convertNumLockShift, convertShiftNumber, isPussleSolved } from '../utils';
 
 const Board = (props: BoardProps): JSX.Element => {
   const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
@@ -129,6 +129,19 @@ const Board = (props: BoardProps): JSX.Element => {
     loadPussle(false, pussle);
   };
 
+  const handleSolve = () => {
+    let pussle: string[] = [];
+    const cells = document.querySelectorAll('.big_num');
+    cells.forEach((el) => {
+      pussle = [...pussle, el.innerHTML];
+    });
+    if (isPussleSolved(pussle)) {
+      alert('Congratulations!');
+    } else {
+      alert('That doesn\'t look right');
+    }
+  };
+
   // Renders the board with content
   const renderBoard = () => {
     let cellArray: JSX.Element[] = [];
@@ -148,6 +161,7 @@ const Board = (props: BoardProps): JSX.Element => {
   return (
     <>
       <button type="button" onClick={lockPussle}>Lock</button>
+      <button type="button" onClick={handleSolve}>Solve</button>
       <div className="board" onKeyDown={handleKeyPress}>
         {isLoading ? <p>Loading...</p> : renderBoard()}
       </div>
