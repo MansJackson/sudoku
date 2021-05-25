@@ -71,20 +71,6 @@ export const isPussleSolved = (pussle: string[]): boolean => {
   let column: string[] = [];
   let box: string[] = [];
 
-  // Check rows and columns
-  // for (let x = 0; x < 9; x += 1) {
-  //   row = [];
-  //   column = [];
-  //   for (let y = 0; y < 9; y += 1) {
-  //     row = [...row, pussle[y + x * 9]];
-  //     column = [...column, pussle[x + y * 9]];
-  //   }
-  //   console.log(column);
-  //   if (row.sort().join('') !== '123456789') return false;
-  //   if (column.sort().join('') !== '123456789') return false;
-  // }
-
-  // Check Box
   for (let i = 0; i < 3; i += 1) {
     for (let x = 0; x < 3; x += 1) {
       row = [];
