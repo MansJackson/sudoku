@@ -18,15 +18,16 @@ import {
 } from '../types';
 import { findRestrictedCells } from '../utils';
 
-export const loadPussleA = () => (dispatch: Dispatch): void => {
+export const loadPussleA = (blank: boolean, pussle?: Record<string, string>) => (
+  dispatch: Dispatch,
+): void => {
   const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
   let setup: Cell[] = [];
 
   for (let x = 0; x < 9; x += 1) {
     for (let y = 1; y <= 9; y += 1) {
-      const pussle = data.hard[0];
       const id = `${columns[x]}${y}`;
-      const exists = !!pussle[id as keyof typeof pussle];
+      const exists = blank ? false : !!pussle![id as keyof typeof pussle];
 
       setup = [
         ...setup,
@@ -34,7 +35,7 @@ export const loadPussleA = () => (dispatch: Dispatch): void => {
           id,
           centerPencil: [],
           cornerPencil: [],
-          bigNum: exists ? pussle[id as keyof typeof pussle] : '',
+          bigNum: exists ? pussle![id as keyof typeof pussle] : '',
           locked: exists,
         },
       ];

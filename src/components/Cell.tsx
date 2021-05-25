@@ -31,14 +31,16 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
 
   // if this cell is in restriced cells array, set local state to true
   useEffect(() => {
-    if (restrictedCells && restrictedCells.includes(content!.id)) {
+    if (!content) return;
+    if (restrictedCells && restrictedCells.includes(content.id)) {
       setRestricted(true);
     } else if (restricted) setRestricted(false);
   }, [restrictedCells]);
 
   // If this cell is in selected array, set local state to true
   useEffect(() => {
-    if (selectedCells && selectedCells.includes(content!.id)) {
+    if (!content) return;
+    if (selectedCells && selectedCells.includes(content.id)) {
       setSelected(true);
     } else if (selected) setSelected(false);
   }, [selectedCells]);

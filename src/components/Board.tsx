@@ -14,7 +14,7 @@ import {
 } from '../redux/actions';
 import { BoardProps, RootState } from '../types';
 import Cell from './Cell';
-import { convertShiftNumber } from '../utils';
+import { convertNumLockShift, convertShiftNumber } from '../utils';
 
 const Board = (props: BoardProps): JSX.Element => {
   const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
@@ -69,7 +69,7 @@ const Board = (props: BoardProps): JSX.Element => {
 
   // LoadPussle
   useEffect(() => {
-    loadPussle();
+    loadPussle(true);
     setIsLoading(false);
   }, []);
 
@@ -79,8 +79,10 @@ const Board = (props: BoardProps): JSX.Element => {
     else clearRestrictedCells();
   }, [selectedCells]);
 
+  // Handles inputs
   const handleKeyPress = (e: React.KeyboardEvent) => {
     const cells = document.querySelectorAll('.cell');
+    e.preventDefault();
     if (e.repeat) return;
 
     if (e.key === 'Backspace') {
@@ -89,7 +91,13 @@ const Board = (props: BoardProps): JSX.Element => {
       });
       return;
     }
-    if (keys.shift) {
+    if (e.getModifierState('NumLock') && convertNumLockShift(e.key)) {
+      const key = convertNumLockShift(e.key);
+      if (!key) return;
+      cells.forEach((el) => {
+        if (el.classList.contains('selected')) setCornerPencil(el.id, key);
+      });
+    } else if (keys.shift) {
       const key = convertShiftNumber(e.key);
       if (!key) return;
       cells.forEach((el) => {
@@ -112,6 +120,16 @@ const Board = (props: BoardProps): JSX.Element => {
     }
   };
 
+  const lockPussle = () => {
+    const cellsToLock = document.querySelectorAll('.big_num');
+    const pussle: Record<string, string> = {};
+    cellsToLock.forEach((el) => {
+      pussle[el.parentElement!.id] = el.innerHTML;
+    });
+    loadPussle(false, pussle);
+  };
+
+  // Renders the board with content
   const renderBoard = () => {
     let cellArray: JSX.Element[] = [];
     let rowArray: JSX.Element[] = [];
@@ -128,9 +146,12 @@ const Board = (props: BoardProps): JSX.Element => {
   };
 
   return (
-    <div className="board" onKeyDown={handleKeyPress}>
-      {isLoading ? <p>Loading...</p> : renderBoard()}
-    </div>
+    <>
+      <button type="button" onClick={lockPussle}>Lock</button>
+      <div className="board" onKeyDown={handleKeyPress}>
+        {isLoading ? <p>Loading...</p> : renderBoard()}
+      </div>
+    </>
   );
 };
 

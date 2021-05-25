@@ -41,12 +41,27 @@ export const convertShiftNumber = (input: string): string | false => {
     case '!': return '1';
     case '"': return '2';
     case '#': return '3';
-    case '€': return '4';
+    case '¤': return '4';
     case '%': return '5';
     case '&': return '6';
     case '/': return '7';
     case '(': return '8';
     case ')': return '9';
+    default: return false;
+  }
+};
+
+export const convertNumLockShift = (input: string): string | false => {
+  switch (input) {
+    case 'End': return '1';
+    case 'ArrowDown': return '2';
+    case 'PageDown': return '3';
+    case 'ArrowLeft': return '4';
+    case 'Clear': return '5';
+    case 'ArrowRight': return '6';
+    case 'Home': return '7';
+    case 'ArrowUp': return '8';
+    case 'PageUp': return '9';
     default: return false;
   }
 };

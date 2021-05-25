@@ -22,7 +22,7 @@ export type BoardProps = {
   keys: Record<string, boolean>
   selectedCells: string[];
   setIsLoading: (isLoading: boolean) => void;
-  loadPussle: () => void;
+  loadPussle: (blank: boolean, pussle?: Record<string, string>) => void;
   setKey: (payload: Record<string, boolean>) => void;
   setCornerPencil: (cellId: string, number: string) => void;
   setCenterPencil: (cellId: string, number: string) => void;
