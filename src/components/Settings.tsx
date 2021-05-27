@@ -2,7 +2,13 @@ import { FormGroup, FormControlLabel, Switch } from '@material-ui/core';
 import React from 'react';
 import { connect } from 'react-redux';
 import { dispatchA } from '../redux/actions';
-import { SettingsProps, RootState, UPDATE_SETTINGS } from '../types';
+import {
+  SettingsProps,
+  RootState,
+  UPDATE_SETTINGS,
+  CLEAR_ERRORS,
+  UPDATE_ERRORS,
+} from '../types';
 
 const Settings = (props: SettingsProps): JSX.Element => {
   const {
@@ -16,6 +22,9 @@ const Settings = (props: SettingsProps): JSX.Element => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(UPDATE_SETTINGS, { [e.target.name]: e.target.checked });
+    if (e.target.name === 'highlightErrors') {
+      dispatch(e.target.checked ? UPDATE_ERRORS : CLEAR_ERRORS, {});
+    }
   };
 
   return (

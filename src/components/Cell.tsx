@@ -103,7 +103,14 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
       onMouseEnter={handleMouseOver}
       onMouseUp={handleMouseUp}
       onMouseDown={handleMouseDown}
-      className={`cell ${content?.locked ? 'locked' : ''} ${restricted ? 'restricted' : ''} ${selected ? 'selected' : ''} bg_${content?.color || ''}`}
+      className={`
+        cell
+        ${content?.locked ? 'locked' : ''}
+        ${content?.error ? 'error' : ''}
+        ${restricted ? 'restricted' : ''}
+        ${selected ? 'selected' : ''}
+        bg_${content?.color || ''}
+      `}
       id={id}
       tabIndex={index}
     >

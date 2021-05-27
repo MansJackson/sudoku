@@ -27,6 +27,7 @@ const Board = (props: BoardProps): JSX.Element => {
   const {
     isLoading,
     selectedCells,
+    restrictedCells,
     selectedMode,
     history,
     board,
@@ -49,10 +50,13 @@ const Board = (props: BoardProps): JSX.Element => {
 
   // update restricted cells when selected cells update
   useEffect(() => {
-    if (!settings.markRestricted) return;
+    if (!settings.markRestricted) {
+      if (restrictedCells.length) dispatch(CLEAR_RESTRICTED_CELLS, {});
+      return;
+    }
     if (selectedCells && selectedCells.length === 1) {
-      const restrictedCells = findRestrictedCells(selectedCells[0]);
-      dispatch(SET_RESTRICTED_CELLS, { restrictedCells });
+      const restricted = findRestrictedCells(selectedCells[0]);
+      dispatch(SET_RESTRICTED_CELLS, { restrictedCells: restricted });
     } else {
       dispatch(CLEAR_RESTRICTED_CELLS, {});
     }
@@ -80,7 +84,6 @@ const Board = (props: BoardProps): JSX.Element => {
     if (!isValidNumber(e.key) && !isOtherValidKey(e.key)) return;
     e.preventDefault();
     let newBoard = [...board];
-    const { removePencilMarks } = settings;
 
     switch (e.key) {
       case ' ':
@@ -88,11 +91,11 @@ const Board = (props: BoardProps): JSX.Element => {
         break;
       // Delete keys
       case 'Backspace':
-        selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, '1', 'delete'); });
+        selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, '1', 'delete', undefined, settings.highlightErrors); });
         dispatch(ADD_TO_HISTORY, { board: newBoard });
         break;
       case 'Delete':
-        selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, '1', 'delete'); });
+        selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, '1', 'delete', undefined, settings.highlightErrors); });
         dispatch(ADD_TO_HISTORY, { board: newBoard });
         break;
       // Arrow Keys
@@ -117,7 +120,9 @@ const Board = (props: BoardProps): JSX.Element => {
         } else if (selectedMode === 'color') {
           selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, e.key, 'color'); });
         } else {
-          selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, e.key, 'normal', settings.removePencilMarks); });
+          selectedCells.forEach((el) => {
+            newBoard = updateBoard(newBoard, el, e.key, 'normal', settings.removePencilMarks, settings.highlightErrors);
+          });
         }
         dispatch(ADD_TO_HISTORY, { board: newBoard });
     }
@@ -155,6 +160,7 @@ const mapStateToProps = (state: RootState) => ({
   history: state.history,
   board: state.board,
   settings: state.general.settings,
+  restrictedCells: state.general.restrictedCells,
 });
 
 export default connect(mapStateToProps, {

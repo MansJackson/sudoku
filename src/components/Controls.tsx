@@ -62,7 +62,7 @@ const Controls = (props: ControlsProps): JSX.Element => {
   // Deletes content of selected cells
   const deleteContent = () => {
     let newBoard = [...board];
-    selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, '1', 'delete'); });
+    selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, '1', 'delete', undefined, settings.highlightErrors); });
     dispatch(ADD_TO_HISTORY, { board: newBoard });
   };
 

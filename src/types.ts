@@ -47,6 +47,7 @@ export type ControlsProps = {
 export type BoardProps = {
   isLoading: boolean;
   selectedCells: string[];
+  restrictedCells: string[];
   selectedMode: Mode;
   history: Board[];
   board: Cell[];
@@ -109,6 +110,7 @@ export type HistoryAction = {
 export type Cell = {
   id: string;
   locked: boolean;
+  error: boolean;
   bigNum: string;
   cornerPencil: string[];
   centerPencil: string[];
@@ -137,3 +139,5 @@ export const CLEAR_HISTORY = 'CLEAR_HISTORY';
 export const UPDATE_SETTINGS = 'UPDATE_SETTINGS';
 export const UNDO = 'UNDO';
 export const REDO = 'REDO';
+export const CLEAR_ERRORS = 'CLEAR_ERRORS';
+export const UPDATE_ERRORS = 'UPDATE_ERRORS';

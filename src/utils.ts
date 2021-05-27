@@ -68,10 +68,7 @@ export const isPussleSolved = (board: string[]): boolean => {
           box = [...box, board[i * 27 + x * 3 + y * 9 + z]];
         }
       }
-      if (row.sort().join('') !== '123456789') {
-        console.log(row);
-        return false;
-      }
+      if (row.sort().join('') !== '123456789') return false;
       if (column.sort().join('') !== '123456789') return false;
       if (box.sort().join('') !== '123456789') return false;
     }
@@ -106,7 +103,32 @@ export const findNextCell = (cellId: string, direction: 'up' | 'down' | 'left' |
   }
 };
 
-export const updateBoard = (state: Cell[], cellId: string, number: string, mode: Mode | 'delete' | 'restart', removePencils?: boolean): Cell[] => {
+const cellHasError = (board: Cell[], cellId: string): boolean => {
+  const number = board.find((cell) => cell.id === cellId)?.bigNum;
+  if (!number) return false;
+
+  const restrictedCells = findRestrictedCells(cellId);
+  for (let i = 0; i < restrictedCells.length; i += 1) {
+    const cellNum = board.find((cell) => cell.id === restrictedCells[i])?.bigNum;
+    if (cellNum === number) return true;
+  }
+
+  return false;
+};
+
+export const updateErrors = (board: Cell[]): Cell[] => board.map((cell) => {
+  if (!cellHasError(board, cell.id)) return { ...cell, error: false };
+  return { ...cell, error: true };
+});
+
+export const updateBoard = (
+  state: Cell[],
+  cellId: string,
+  number: string,
+  mode: Mode | 'delete' | 'restart',
+  removePencils?: boolean,
+  markErrors?: boolean,
+): Cell[] => {
   let filteredBoard = state.filter((el) => el.id !== cellId);
   let targetCell = state.find((el) => el.id === cellId);
   let restrictedCells: string[];
@@ -160,6 +182,8 @@ export const updateBoard = (state: Cell[], cellId: string, number: string, mode:
       }
 
       targetCell = { ...targetCell!, bigNum: number };
+      if (markErrors) filteredBoard = updateErrors([...filteredBoard, targetCell]);
+
       return [...filteredBoard, targetCell];
 
     case 'color':
@@ -171,6 +195,7 @@ export const updateBoard = (state: Cell[], cellId: string, number: string, mode:
       targetCell = {
         ...targetCell!, bigNum: '', cornerPencil: [], centerPencil: [],
       };
+      if (markErrors) filteredBoard = updateErrors(filteredBoard);
       return [...filteredBoard, targetCell];
 
     case 'restart':

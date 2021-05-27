@@ -19,7 +19,10 @@ import {
   Board,
   CLEAR_HISTORY,
   UPDATE_SETTINGS,
+  CLEAR_ERRORS,
+  UPDATE_ERRORS,
 } from '../types';
+import { updateErrors } from '../utils';
 
 const defaultHistoryState: Board[] = [];
 const defaultBoardState: Cell[] = [];
@@ -110,6 +113,12 @@ const boardReducer = (state = defaultBoardState, action: BoardAction) => {
   switch (action.type) {
     case SET_PUSSLE:
       return payload.cell;
+
+    case CLEAR_ERRORS:
+      return state.map((el) => ({ ...el, error: false }));
+
+    case UPDATE_ERRORS:
+      return updateErrors(state);
 
     default:
       return state;

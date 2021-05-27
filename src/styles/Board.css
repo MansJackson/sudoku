@@ -137,6 +137,10 @@
   cursor: default;
 }
 
+.error {
+  color: rgb(182, 0, 0);
+}
+
 .selected {
   background-color: rgba(86, 202, 231, 0.75);
   z-index: 2;
