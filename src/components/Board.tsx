@@ -30,6 +30,7 @@ const Board = (props: BoardProps): JSX.Element => {
     selectedMode,
     history,
     board,
+    settings,
     loadPussle,
     dispatch,
   } = props;
@@ -48,6 +49,7 @@ const Board = (props: BoardProps): JSX.Element => {
 
   // update restricted cells when selected cells update
   useEffect(() => {
+    if (!settings.markRestricted) return;
     if (selectedCells && selectedCells.length === 1) {
       const restrictedCells = findRestrictedCells(selectedCells[0]);
       dispatch(SET_RESTRICTED_CELLS, { restrictedCells });
@@ -78,6 +80,7 @@ const Board = (props: BoardProps): JSX.Element => {
     if (!isValidNumber(e.key) && !isOtherValidKey(e.key)) return;
     e.preventDefault();
     let newBoard = [...board];
+    const { removePencilMarks } = settings;
 
     switch (e.key) {
       case ' ':
@@ -114,7 +117,7 @@ const Board = (props: BoardProps): JSX.Element => {
         } else if (selectedMode === 'color') {
           selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, e.key, 'color'); });
         } else {
-          selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, e.key, 'normal'); });
+          selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, e.key, 'normal', settings.removePencilMarks); });
         }
         dispatch(ADD_TO_HISTORY, { board: newBoard });
     }
@@ -151,6 +154,7 @@ const mapStateToProps = (state: RootState) => ({
   selectedMode: state.general.mode,
   history: state.history,
   board: state.board,
+  settings: state.general.settings,
 });
 
 export default connect(mapStateToProps, {

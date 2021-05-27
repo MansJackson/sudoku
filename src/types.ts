@@ -7,6 +7,11 @@ export type RootState = {
     mode: Mode;
     restrictedCells: string[];
     selectedCells: string[];
+    settings: {
+      markRestricted: boolean,
+      highlightErrors: boolean,
+      removePencilMarks: boolean,
+    }
   },
   history: Board[];
 };
@@ -16,11 +21,25 @@ export type HomeProps = {
 
 };
 
+export type SettingsProps = {
+  settings: {
+    markRestricted: boolean,
+    highlightErrors: boolean,
+    removePencilMarks: boolean,
+  }
+  dispatch: (type: string, payload: Record<string, any>) => void;
+};
+
 export type ControlsProps = {
   selectedCells: string[];
   selectedMode: Mode;
   history: Board[];
   board: Cell[];
+  settings: {
+    markRestricted: boolean,
+    highlightErrors: boolean,
+    removePencilMarks: boolean,
+  }
   loadPussle: (blank: boolean, pussle?: Record<string, string>, userCreated?: boolean) => void;
   dispatch: (type: string, payload: Record<string, any>) => void;
 };
@@ -31,6 +50,11 @@ export type BoardProps = {
   selectedMode: Mode;
   history: Board[];
   board: Cell[];
+  settings: {
+    markRestricted: boolean,
+    highlightErrors: boolean,
+    removePencilMarks: boolean,
+  }
   dispatch: (type: string, payload: Record<string, any>) => void;
   loadPussle: (blank: boolean, pussle?: Record<string, string>) => void;
 };
@@ -68,6 +92,9 @@ export type GeneralAction = {
     restrictedCells: string[],
     selectedCells: string[],
     mode: string,
+    markRestricted: boolean,
+    highlightErrors: boolean,
+    removePencilMarks: boolean,
   };
 };
 
@@ -100,7 +127,6 @@ export const SET_PUSSLE = 'SET_PUSSLE';
 export const SET_IS_LOADING = 'SET_IS_LOADING';
 export const SET_SELECTING = 'SET_SELECTING';
 export const SET_MOUSE_DOWN = 'SET_MOUSE_DOWN';
-export const CLEAR_PUSSLE = 'CLEAR_PUSSLE';
 export const CLEAR_RESTRICTED_CELLS = 'CLEAR_RESTRICTED_CELLS';
 export const SET_RESTRICTED_CELLS = 'SET_RESTRICTED_CELLS';
 export const SET_SELECTED_CELLS = 'SET_SELECTED_CELLS';
@@ -108,5 +134,6 @@ export const SET_SELECTED_MODE = 'SET_SELECTED_MODE';
 export const TOGGLE_MODE = 'TOGGLE_MODE';
 export const ADD_TO_HISTORY = 'ADD_TO_HISTORY';
 export const CLEAR_HISTORY = 'CLEAR_HISTORY';
+export const UPDATE_SETTINGS = 'UPDATE_SETTINGS';
 export const UNDO = 'UNDO';
 export const REDO = 'REDO';

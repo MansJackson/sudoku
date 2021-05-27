@@ -3,7 +3,6 @@ import {
   ADD_TO_HISTORY,
   Cell,
   CLEAR_HISTORY,
-  SET_PUSSLE,
 } from '../types';
 
 export const loadPussleA = (blank: boolean, pussle?: Record<string, string>, userCreated?: boolean) => (
@@ -31,12 +30,6 @@ export const loadPussleA = (blank: boolean, pussle?: Record<string, string>, use
     }
   }
 
-  dispatch({
-    type: SET_PUSSLE,
-    payload: {
-      cell: setup,
-    },
-  });
   if (userCreated) {
     dispatch({
       type: ADD_TO_HISTORY,

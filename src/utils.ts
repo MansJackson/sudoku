@@ -103,7 +103,7 @@ export const findNextCell = (cellId: string, direction: 'up' | 'down' | 'left' |
   }
 };
 
-export const updateBoard = (state: Cell[], cellId: string, number: string, mode: Mode | 'delete' | 'restart'): Cell[] => {
+export const updateBoard = (state: Cell[], cellId: string, number: string, mode: Mode | 'delete' | 'restart', removePencils?: boolean): Cell[] => {
   let filteredBoard = state.filter((el) => el.id !== cellId);
   let targetCell = state.find((el) => el.id === cellId);
   let restrictedCells: string[];
@@ -146,13 +146,15 @@ export const updateBoard = (state: Cell[], cellId: string, number: string, mode:
 
     case 'normal':
       restrictedCells = findRestrictedCells(cellId);
-      filteredBoard = filteredBoard.map((cell) => {
-        if (!restrictedCells.includes(cell.id)) return cell;
-        if (cell.locked) return cell;
-        const newCenter = cell.centerPencil.filter((num) => num !== number);
-        const newCorner = cell.cornerPencil.filter((num) => num !== number);
-        return { ...cell, cornerPencil: newCorner, centerPencil: newCenter };
-      });
+      if (removePencils) {
+        filteredBoard = filteredBoard.map((cell) => {
+          if (!restrictedCells.includes(cell.id)) return cell;
+          if (cell.locked) return cell;
+          const newCenter = cell.centerPencil.filter((num) => num !== number);
+          const newCorner = cell.cornerPencil.filter((num) => num !== number);
+          return { ...cell, cornerPencil: newCorner, centerPencil: newCenter };
+        });
+      }
 
       targetCell = { ...targetCell!, bigNum: number };
       return [...filteredBoard, targetCell];

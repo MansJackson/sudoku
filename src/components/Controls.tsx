@@ -20,6 +20,7 @@ const Controls = (props: ControlsProps): JSX.Element => {
     selectedMode,
     history,
     board,
+    settings,
     loadPussle,
     dispatch,
   } = props;
@@ -83,7 +84,7 @@ const Controls = (props: ControlsProps): JSX.Element => {
 
   const setContent = (number: string) => {
     let newBoard = [...board];
-    selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, number, selectedMode); });
+    selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, number, selectedMode, settings.removePencilMarks); });
     dispatch(ADD_TO_HISTORY, { board: newBoard });
   };
 
@@ -300,6 +301,7 @@ const mapStateToProps = (state: RootState) => ({
   selectedMode: state.general.mode,
   history: state.history,
   board: state.board,
+  settings: state.general.settings,
 });
 
 export default connect(mapStateToProps, {

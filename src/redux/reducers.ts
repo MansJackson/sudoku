@@ -10,7 +10,6 @@ import {
   SET_SELECTED_CELLS,
   GeneralAction,
   BoardAction,
-  CLEAR_PUSSLE,
   SET_SELECTED_MODE,
   TOGGLE_MODE,
   HistoryAction,
@@ -19,6 +18,7 @@ import {
   REDO,
   Board,
   CLEAR_HISTORY,
+  UPDATE_SETTINGS,
 } from '../types';
 
 const defaultHistoryState: Board[] = [];
@@ -30,6 +30,11 @@ const defaultGeneralState = {
   mode: 'normal',
   restrictedCells: [],
   selectedCells: [],
+  settings: {
+    markRestricted: true,
+    highlightErrors: true,
+    removePencilMarks: true,
+  },
 };
 
 const historyReducer = (state = defaultHistoryState, action: HistoryAction) => {
@@ -92,6 +97,8 @@ const generalReducer = (state = defaultGeneralState, action: GeneralAction) => {
       if (state.mode === 'center') return { ...state, mode: 'color' };
       if (state.mode === 'color') return { ...state, mode: 'normal' };
       return state;
+    case UPDATE_SETTINGS:
+      return { ...state, settings: { ...state.settings, ...payload } };
     default:
       return state;
   }
@@ -103,17 +110,6 @@ const boardReducer = (state = defaultBoardState, action: BoardAction) => {
   switch (action.type) {
     case SET_PUSSLE:
       return payload.cell;
-
-    case CLEAR_PUSSLE:
-      return state.map((cell) => {
-        if (cell.locked) return cell;
-        return {
-          ...cell,
-          bigNum: '',
-          cornerPencil: [],
-          centerPencil: [],
-        };
-      });
 
     default:
       return state;
