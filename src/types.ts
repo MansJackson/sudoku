@@ -28,7 +28,6 @@ export type CellProps = {
   mouseDown: boolean;
   selectedCells: string[];
   restrictedCells: string[];
-  updateSelectedCells: () => void;
   dispatch: (type: string, payload: Record<string, any>) => void;
 };
 

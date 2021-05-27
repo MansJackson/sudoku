@@ -2,6 +2,18 @@ export const isValidNumber = (input: string): boolean => (
   Number.isInteger(Number(input)) && Number(input) > 0
 );
 
+export const isArrowOrDelKey = (input: string): boolean => {
+  switch (input) {
+    case 'ArrowRight': return true;
+    case 'ArrowLeft': return true;
+    case 'ArrowUp': return true;
+    case 'ArrowDown': return true;
+    case 'Backspace': return true;
+    case 'Delete': return true;
+    default: return false;
+  }
+};
+
 export const findRestrictedCells = (cellId: string): string[] => {
   const row = Number(cellId[1]);
   const column = cellId[0];
@@ -90,4 +102,30 @@ export const isPussleSolved = (pussle: string[]): boolean => {
   }
 
   return true;
+};
+
+export const findNextCell = (cellId: string, direction: 'up' | 'down' | 'left' | 'right'): string | false => {
+  const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
+  const column: string = cellId[0];
+  const row = Number(cellId[1]);
+  let cIndex: number;
+
+  switch (direction) {
+    case 'up':
+      if (row === 1) return false;
+      return `${column}${row - 1}`;
+    case 'down':
+      if (row === 9) return false;
+      return `${column}${row + 1}`;
+    case 'left':
+      cIndex = columns.findIndex((el) => el === column);
+      if (column === 'A') return false;
+      return `${columns[cIndex - 1]}${row}`;
+    case 'right':
+      cIndex = columns.findIndex((el) => el === column);
+      if (column === 'I') return false;
+      return `${columns[cIndex + 1]}${row}`;
+    default:
+      return false;
+  }
 };

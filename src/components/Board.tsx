@@ -15,10 +15,12 @@ import {
   SET_CORNER_PENCIL,
   SET_IS_LOADING,
   SET_RESTRICTED_CELLS,
+  SET_SELECTED_CELLS,
 } from '../types';
 import Cell from './Cell';
 import {
-  findRestrictedCells, isPussleSolved,
+  findNextCell,
+  findRestrictedCells, isArrowOrDelKey, isPussleSolved, isValidNumber,
 } from '../utils';
 
 const Board = (props: BoardProps): JSX.Element => {
@@ -38,7 +40,7 @@ const Board = (props: BoardProps): JSX.Element => {
 
   // update restricted cells
   useEffect(() => {
-    if (selectedCells.length === 1) {
+    if (selectedCells && selectedCells.length === 1) {
       const restrictedCells = findRestrictedCells(selectedCells[0]);
       dispatch(SET_RESTRICTED_CELLS, { restrictedCells });
     } else {
@@ -46,36 +48,70 @@ const Board = (props: BoardProps): JSX.Element => {
     }
   }, [selectedCells]);
 
+  const targetNextCell = (shift: boolean, direction: 'up' | 'down' | 'left' | 'right') => {
+    const nextCell = findNextCell(selectedCells[selectedCells.length - 1], direction);
+    if (shift) {
+      dispatch(
+        SET_SELECTED_CELLS,
+        { selectedCells: [...selectedCells, nextCell] },
+      );
+    } else {
+      dispatch(
+        SET_SELECTED_CELLS,
+        { selectedCells: [nextCell] },
+      );
+    }
+  };
+
   // Handles inputs
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    const cells = document.querySelectorAll('.cell');
-    e.preventDefault();
     if (e.repeat) return;
+    if (!isValidNumber(e.key) && !isArrowOrDelKey(e.key)) return;
+    e.preventDefault();
+    const cells = document.querySelectorAll('.cell');
 
-    if (e.key === 'Backspace' || e.key === 'Delete') {
-      cells.forEach((el) => {
-        if (el.classList.contains('selected')) dispatch(CLEAR_CELL, { cellId: el.id });
-      });
-      return;
-    }
-    if (e.altKey) {
-      cells.forEach((el) => {
-        if (el.classList.contains('selected')) dispatch(SET_CORNER_PENCIL, { cellId: el.id, number: e.key });
-      });
-    } else if (e.ctrlKey) {
-      cells.forEach((el) => {
-        if (el.classList.contains('selected')) dispatch(SET_CENTER_PENCIL, { cellId: el.id, number: e.key });
-      });
-    } else if (e.metaKey) {
-      cells.forEach((el) => {
-        if (el.classList.contains('selected')) dispatch(SET_CENTER_PENCIL, { cellId: el.id, number: e.key });
-      });
-    } else {
-      cells.forEach((el) => {
-        if (el.classList.contains('selected')) {
-          dispatch(SET_BIG_NUM, { cellId: el.id, number: e.key });
+    switch (e.key) {
+      // Delete keys
+      case 'Backspace':
+        cells.forEach((el) => {
+          if (el.classList.contains('selected')) dispatch(CLEAR_CELL, { cellId: el.id });
+        });
+        break;
+      case 'Delete':
+        cells.forEach((el) => {
+          if (el.classList.contains('selected')) dispatch(CLEAR_CELL, { cellId: el.id });
+        });
+        break;
+      // Arrow Keys
+      case 'ArrowDown':
+        targetNextCell(e.shiftKey, 'down');
+        break;
+      case 'ArrowUp':
+        targetNextCell(e.shiftKey, 'up');
+        break;
+      case 'ArrowLeft':
+        targetNextCell(e.shiftKey, 'left');
+        break;
+      case 'ArrowRight':
+        targetNextCell(e.shiftKey, 'right');
+        break;
+      // Numbers
+      default:
+        if (e.altKey) {
+          cells.forEach((el) => {
+            if (el.classList.contains('selected')) dispatch(SET_CORNER_PENCIL, { cellId: el.id, number: e.key });
+          });
+        } else if (e.ctrlKey || e.metaKey) {
+          cells.forEach((el) => {
+            if (el.classList.contains('selected')) dispatch(SET_CENTER_PENCIL, { cellId: el.id, number: e.key });
+          });
+        } else {
+          cells.forEach((el) => {
+            if (el.classList.contains('selected')) {
+              dispatch(SET_BIG_NUM, { cellId: el.id, number: e.key });
+            }
+          });
         }
-      });
     }
   };
 
@@ -108,9 +144,9 @@ const Board = (props: BoardProps): JSX.Element => {
     let cellArray: JSX.Element[] = [];
     let rowArray: JSX.Element[] = [];
 
-    for (let x = 0; x < 9; x += 1) {
-      for (let y = 1; y <= 9; y += 1) {
-        rowArray = [...rowArray, <Cell key={`cell_${columns[x]}${y}`} index={(x + 1) * y} id={`${columns[x]}${y}`} />];
+    for (let x = 1; x <= 9; x += 1) {
+      for (let y = 0; y < 9; y += 1) {
+        rowArray = [...rowArray, <Cell key={`cell_${columns[x]}${y}`} index={(x + 1) * y} id={`${columns[y]}${x}`} />];
       }
       cellArray = [...cellArray, <div key={`column_${x}`} className="board_row">{rowArray}</div>];
       rowArray = [];

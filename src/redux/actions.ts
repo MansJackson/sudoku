@@ -2,7 +2,6 @@ import { Dispatch } from 'redux';
 import {
   Cell,
   SET_PUSSLE,
-  SET_SELECTED_CELLS,
 } from '../types';
 
 export const loadPussleA = (blank: boolean, pussle?: Record<string, string>) => (
@@ -41,21 +40,5 @@ export const dispatchA = (type: string, payload: any) => (dispatch: Dispatch): v
   dispatch({
     type,
     payload,
-  });
-};
-
-export const updateSelectedCellsA = () => (dispatch: Dispatch): void => {
-  const cells = document.querySelectorAll('.selected');
-  let selectedCells: string[] = [];
-
-  cells.forEach((el) => {
-    if (el.classList.contains('selected')) selectedCells = [...selectedCells, el.id];
-  });
-
-  dispatch({
-    type: SET_SELECTED_CELLS,
-    payload: {
-      selectedCells,
-    },
   });
 };

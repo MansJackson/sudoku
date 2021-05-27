@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
+import { dispatchA } from '../redux/actions';
 import {
-  dispatchA,
-  updateSelectedCellsA,
-} from '../redux/actions';
-import {
-  CellOwnProps, CellProps, RootState, SET_MOUSE_DOWN, SET_SELECTING,
+  CellOwnProps, CellProps, RootState, SET_MOUSE_DOWN, SET_SELECTED_CELLS, SET_SELECTING,
 } from '../types';
 
 const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
@@ -19,7 +16,6 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
     mouseDown,
     selectedCells,
     restrictedCells,
-    updateSelectedCells,
     dispatch,
   } = props;
   const content = board.find((el) => el.id === id);
@@ -42,51 +38,47 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
     } else if (selected) setSelected(false);
   }, [selectedCells]);
 
-  // Should refactor this to not use classlist but state instead
+  // If leftMouse Is Down select or deselect on hover
   const handleMouseOver = (e: React.MouseEvent<HTMLDivElement>) => {
-    const classes = e.currentTarget.classList;
     if (mouseDown) {
-      if (selecting) {
-        if (!classes.contains('selected')) {
-          classes.add('selected');
-          updateSelectedCells();
-        }
-      } else if (selecting === false) {
-        if (classes.contains('selected')) {
-          classes.remove('selected');
-          updateSelectedCells();
-        }
+      let selectedCopy = [...selectedCells];
+      const cellId = e.currentTarget.id;
+      const isSelected = selectedCopy.includes(cellId);
+
+      if (selecting && !isSelected) selectedCopy = [...selectedCopy, cellId];
+      if (!selecting && isSelected) {
+        selectedCopy = selectedCopy.filter((el) => (el !== cellId));
       }
+      dispatch(SET_SELECTED_CELLS, { selectedCells: selectedCopy });
     }
   };
 
-  // Should refactor this to not use classlist but state instead
+  // Handles selecting cells in grid
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.nativeEvent.button !== 0) return;
-    const classes = e.currentTarget.classList;
-    const count = selectedCells.length;
+    let selectedCopy = selectedCells.length ? [...selectedCells] : [];
+    const count = selectedCopy.length;
+    let isSelected = selectedCopy.includes(content!.id);
 
     // If the shift key is not held down => clear selections
     if (!e.shiftKey) {
-      if (count === 1 && classes.contains('selected')) {
-        classes.remove('selected');
-        updateSelectedCells();
+      if (count === 1 && isSelected) {
+        dispatch(SET_SELECTED_CELLS, { selectedCells: [] });
         return;
       }
-      document.querySelectorAll('.cell').forEach((el) => {
-        if (el.classList.contains('selected')) el.classList.remove('selected');
-      });
+      selectedCopy = [];
+      isSelected = selectedCopy.includes(content!.id);
     }
 
     // Removes or adds 'selected' to the clicked cell
-    if (classes.contains('selected')) {
-      classes.remove('selected');
+    if (isSelected) {
+      selectedCopy = selectedCopy.filter((el) => el !== content!.id);
       dispatch(SET_SELECTING, { selecting: false });
     } else {
-      classes.add('selected');
+      selectedCopy = [...selectedCopy, content!.id];
       dispatch(SET_SELECTING, { selecting: true });
     }
-    updateSelectedCells();
+    dispatch(SET_SELECTED_CELLS, { selectedCells: selectedCopy });
     dispatch(SET_MOUSE_DOWN, { mouseDown: true });
   };
 
@@ -130,6 +122,5 @@ const mapStateToProps = (state: RootState, ownProps: CellOwnProps) => ({
 });
 
 export default connect(mapStateToProps, {
-  updateSelectedCells: updateSelectedCellsA,
   dispatch: dispatchA,
 })(Cell);
