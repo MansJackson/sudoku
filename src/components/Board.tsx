@@ -16,12 +16,11 @@ import {
   SET_IS_LOADING,
   SET_RESTRICTED_CELLS,
   SET_SELECTED_CELLS,
-  SET_PUSSLE,
 } from '../types';
 import Cell from './Cell';
 import {
   findNextCell,
-  findRestrictedCells, isArrowOrDelKey, isPussleSolved, isValidNumber,
+  findRestrictedCells, isArrowOrDelKey, isValidNumber,
 } from '../utils';
 
 const Board = (props: BoardProps): JSX.Element => {
@@ -29,7 +28,6 @@ const Board = (props: BoardProps): JSX.Element => {
   const {
     isLoading,
     selectedCells,
-    board,
     loadPussle,
     dispatch,
   } = props;
@@ -100,46 +98,8 @@ const Board = (props: BoardProps): JSX.Element => {
         } else if (e.ctrlKey || e.metaKey) {
           selectedCells.forEach((el) => dispatch(SET_CENTER_PENCIL, { cellId: el, number: e.key }));
         } else {
-          // Updates pencil marks in restricted cells
-          selectedCells.forEach((el) => {
-            const restrictedCells = findRestrictedCells(el);
-            const boardCopy = [...board];
-            const newBoard = boardCopy.map((cell) => {
-              if (!restrictedCells.includes(cell.id)) return cell;
-              if (cell.locked) return cell;
-              const newCenter = cell.centerPencil.filter((num) => num !== e.key);
-              const newCorner = cell.cornerPencil.filter((num) => num !== e.key);
-              return { ...cell, cornerPencil: newCorner, centerPencil: newCenter };
-            });
-
-            dispatch(SET_PUSSLE, { cell: newBoard });
-            dispatch(SET_BIG_NUM, { cellId: el, number: e.key });
-          });
+          selectedCells.forEach((el) => dispatch(SET_BIG_NUM, { cellId: el, number: e.key }));
         }
-    }
-  };
-
-  // Locks a user added pussle
-  const lockPussle = () => {
-    const cellsToLock = document.querySelectorAll('.big_num');
-    const pussle: Record<string, string> = {};
-    cellsToLock.forEach((el) => {
-      pussle[el.parentElement!.id] = el.innerHTML;
-    });
-    loadPussle(false, pussle);
-  };
-
-  // Checks if pussle is correctly solved
-  const handleSolve = () => {
-    let pussle: string[] = [];
-    const cells = document.querySelectorAll('.big_num');
-    cells.forEach((el) => {
-      pussle = [...pussle, el.innerHTML];
-    });
-    if (isPussleSolved(pussle)) {
-      alert('Congratulations!');
-    } else {
-      alert('That doesn\'t look right');
     }
   };
 
@@ -161,8 +121,6 @@ const Board = (props: BoardProps): JSX.Element => {
 
   return (
     <>
-      <button type="button" onClick={lockPussle}>Lock</button>
-      <button type="button" onClick={handleSolve}>Solve</button>
       <div className="board" onKeyDown={handleKeyPress}>
         {isLoading ? <p>Loading...</p> : renderBoard()}
       </div>
@@ -173,7 +131,6 @@ const Board = (props: BoardProps): JSX.Element => {
 const mapStateToProps = (state: RootState) => ({
   isLoading: state.general.isLoading,
   selectedCells: state.general.selectedCells,
-  board: state.board,
 });
 
 export default connect(mapStateToProps, {
