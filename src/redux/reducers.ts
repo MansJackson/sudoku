@@ -16,6 +16,7 @@ import {
   BoardAction,
   CLEAR_PUSSLE,
   SET_SELECTED_MODE,
+  TOGGLE_MODE,
 } from '../types';
 import { findRestrictedCells, isValidNumber } from '../utils';
 
@@ -47,6 +48,12 @@ const generalReducer = (state = defaultGeneralState, action: GeneralAction) => {
       return { ...state, selectedCells: payload.selectedCells };
     case SET_SELECTED_MODE:
       return { ...state, mode: payload.mode };
+    case TOGGLE_MODE:
+      if (state.mode === 'normal') return { ...state, mode: 'corner' };
+      if (state.mode === 'corner') return { ...state, mode: 'center' };
+      if (state.mode === 'center') return { ...state, mode: 'color' };
+      if (state.mode === 'color') return { ...state, mode: 'normal' };
+      return state;
     default:
       return state;
   }

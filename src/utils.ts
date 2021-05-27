@@ -2,7 +2,7 @@ export const isValidNumber = (input: string): boolean => (
   Number.isInteger(Number(input)) && Number(input) > 0
 );
 
-export const isArrowOrDelKey = (input: string): boolean => {
+export const isOtherValidKey = (input: string): boolean => {
   switch (input) {
     case 'ArrowRight': return true;
     case 'ArrowLeft': return true;
@@ -10,6 +10,7 @@ export const isArrowOrDelKey = (input: string): boolean => {
     case 'ArrowDown': return true;
     case 'Backspace': return true;
     case 'Delete': return true;
+    case ' ': return true;
     default: return false;
   }
 };

@@ -25,6 +25,7 @@ export type ControlsProps = {
 export type BoardProps = {
   isLoading: boolean;
   selectedCells: string[];
+  selectedMode: Mode;
   dispatch: (type: string, payload: Record<string, any>) => void;
   loadPussle: (blank: boolean, pussle?: Record<string, string>) => void;
 };
@@ -90,3 +91,4 @@ export const CLEAR_RESTRICTED_CELLS = 'CLEAR_RESTRICTED_CELLS';
 export const SET_RESTRICTED_CELLS = 'SET_RESTRICTED_CELLS';
 export const SET_SELECTED_CELLS = 'SET_SELECTED_CELLS';
 export const SET_SELECTED_MODE = 'SET_SELECTED_MODE';
+export const TOGGLE_MODE = 'TOGGLE_MODE';

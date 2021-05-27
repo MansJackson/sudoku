@@ -16,11 +16,12 @@ import {
   SET_IS_LOADING,
   SET_RESTRICTED_CELLS,
   SET_SELECTED_CELLS,
+  TOGGLE_MODE,
 } from '../types';
 import Cell from './Cell';
 import {
   findNextCell,
-  findRestrictedCells, isArrowOrDelKey, isValidNumber,
+  findRestrictedCells, isOtherValidKey, isValidNumber,
 } from '../utils';
 
 const Board = (props: BoardProps): JSX.Element => {
@@ -28,6 +29,7 @@ const Board = (props: BoardProps): JSX.Element => {
   const {
     isLoading,
     selectedCells,
+    selectedMode,
     loadPussle,
     dispatch,
   } = props;
@@ -67,10 +69,13 @@ const Board = (props: BoardProps): JSX.Element => {
   // Handles inputs
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.repeat) return;
-    if (!isValidNumber(e.key) && !isArrowOrDelKey(e.key)) return;
+    if (!isValidNumber(e.key) && !isOtherValidKey(e.key)) return;
     e.preventDefault();
 
     switch (e.key) {
+      case ' ':
+        dispatch(TOGGLE_MODE, {});
+        break;
       // Delete keys
       case 'Backspace':
         selectedCells.forEach((el) => dispatch(CLEAR_CELL, { cellId: el }));
@@ -93,9 +98,9 @@ const Board = (props: BoardProps): JSX.Element => {
         break;
       // Numbers
       default:
-        if (e.altKey) {
+        if (e.altKey || selectedMode === 'corner') {
           selectedCells.forEach((el) => dispatch(SET_CORNER_PENCIL, { cellId: el, number: e.key }));
-        } else if (e.ctrlKey || e.metaKey) {
+        } else if (e.ctrlKey || e.metaKey || selectedMode === 'center') {
           selectedCells.forEach((el) => dispatch(SET_CENTER_PENCIL, { cellId: el, number: e.key }));
         } else {
           selectedCells.forEach((el) => dispatch(SET_BIG_NUM, { cellId: el, number: e.key }));
@@ -131,6 +136,7 @@ const Board = (props: BoardProps): JSX.Element => {
 const mapStateToProps = (state: RootState) => ({
   isLoading: state.general.isLoading,
   selectedCells: state.general.selectedCells,
+  selectedMode: state.general.mode,
 });
 
 export default connect(mapStateToProps, {
