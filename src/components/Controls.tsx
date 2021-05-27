@@ -1,29 +1,38 @@
 import { Button } from '@material-ui/core';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { dispatchA, loadPussleA } from '../redux/actions';
 import '../styles/Controls.css';
 import {
-  CLEAR_CELL,
-  CLEAR_PUSSLE,
+  ADD_TO_HISTORY,
   ControlsProps,
   Mode,
+  REDO,
   RootState,
-  SET_BIG_NUM,
-  SET_CENTER_PENCIL,
-  SET_COLOR,
-  SET_CORNER_PENCIL,
   SET_SELECTED_MODE,
+  UNDO,
 } from '../types';
-import { isPussleSolved } from '../utils';
+import { isPussleSolved, updateBoard } from '../utils';
 
 const Controls = (props: ControlsProps): JSX.Element => {
   const {
     selectedCells,
     selectedMode,
+    history,
+    board,
     loadPussle,
     dispatch,
   } = props;
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+
+  useEffect(() => {
+    if (history.length >= 2 && history[history.length - 1].id !== 0) setCanUndo(true);
+    else setCanUndo(false);
+
+    if (history.length >= 2 && history[0].id !== 0) setCanRedo(true);
+    else setCanRedo(false);
+  }, [history]);
 
   // Locks the pussle
   const lockPussle = () => {
@@ -32,7 +41,7 @@ const Controls = (props: ControlsProps): JSX.Element => {
     cellsToLock.forEach((el) => {
       pussle[el.parentElement!.id] = el.innerHTML;
     });
-    loadPussle(false, pussle);
+    loadPussle(false, pussle, true);
   };
 
   // Checks if pussle is correctly solved
@@ -51,7 +60,21 @@ const Controls = (props: ControlsProps): JSX.Element => {
 
   // Deletes content of selected cells
   const deleteContent = () => {
-    selectedCells.forEach((el) => dispatch(CLEAR_CELL, { cellId: el }));
+    let newBoard = [...board];
+    selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, '1', 'delete'); });
+    dispatch(ADD_TO_HISTORY, { board: newBoard });
+  };
+
+  const restart = () => {
+    let hasContent = false;
+    for (let i = 0; i < 81; i += 1) {
+      if (!board[i].locked) {
+        if (!!board[i].bigNum || !!board[i].centerPencil.length || !!board[i].cornerPencil.length) hasContent = true;
+      }
+    }
+    if (!hasContent) return;
+    const newBoard = updateBoard(board, 'a1', '1', 'restart');
+    dispatch(ADD_TO_HISTORY, { board: newBoard });
   };
 
   const setSelectedMode = (mode: Mode) => {
@@ -59,22 +82,9 @@ const Controls = (props: ControlsProps): JSX.Element => {
   };
 
   const setContent = (number: string) => {
-    switch (selectedMode) {
-      case 'normal':
-        selectedCells.forEach((el) => dispatch(SET_BIG_NUM, { cellId: el, number }));
-        break;
-      case 'corner':
-        selectedCells.forEach((el) => dispatch(SET_CORNER_PENCIL, { cellId: el, number }));
-        break;
-      case 'center':
-        selectedCells.forEach((el) => dispatch(SET_CENTER_PENCIL, { cellId: el, number }));
-        break;
-      case 'color':
-        selectedCells.forEach((el) => dispatch(SET_COLOR, { cellId: el, number }));
-        break;
-      default:
-        selectedCells.forEach((el) => dispatch(SET_BIG_NUM, { cellId: el, number }));
-    }
+    let newBoard = [...board];
+    selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, number, selectedMode); });
+    dispatch(ADD_TO_HISTORY, { board: newBoard });
   };
 
   return (
@@ -205,24 +215,56 @@ const Controls = (props: ControlsProps): JSX.Element => {
       >
         Delete
       </Button>
+      {canUndo
+        ? (
+          <Button
+            onClick={() => { dispatch(UNDO, {}); }}
+            color="primary"
+            variant="outlined"
+            size="small"
+            className="btn btn_extra"
+          >
+            Undo
+          </Button>
+        )
+        : (
+          <Button
+            onClick={() => { dispatch(UNDO, {}); }}
+            color="primary"
+            variant="outlined"
+            size="small"
+            className="btn btn_extra"
+            disabled
+          >
+            Undo
+          </Button>
+        )}
+      {canRedo
+        ? (
+          <Button
+            onClick={() => { dispatch(REDO, {}); }}
+            color="primary"
+            variant="outlined"
+            size="small"
+            className="btn btn_extra"
+          >
+            Redo
+          </Button>
+        )
+        : (
+          <Button
+            onClick={() => { dispatch(REDO, {}); }}
+            color="primary"
+            variant="outlined"
+            size="small"
+            className="btn btn_extra"
+            disabled
+          >
+            Redo
+          </Button>
+        )}
       <Button
-        color="primary"
-        variant="outlined"
-        size="small"
-        className="btn btn_extra"
-      >
-        Undo
-      </Button>
-      <Button
-        color="primary"
-        variant="outlined"
-        size="small"
-        className="btn btn_extra"
-      >
-        Redo
-      </Button>
-      <Button
-        onClick={() => dispatch(CLEAR_PUSSLE, {})}
+        onClick={restart}
         color="primary"
         variant="outlined"
         size="small"
@@ -256,6 +298,8 @@ const Controls = (props: ControlsProps): JSX.Element => {
 const mapStateToProps = (state: RootState) => ({
   selectedCells: state.general.selectedCells,
   selectedMode: state.general.mode,
+  history: state.history,
+  board: state.board,
 });
 
 export default connect(mapStateToProps, {

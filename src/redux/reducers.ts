@@ -5,10 +5,6 @@ import {
   SET_IS_LOADING,
   SET_SELECTING,
   SET_MOUSE_DOWN,
-  SET_CORNER_PENCIL,
-  SET_CENTER_PENCIL,
-  SET_BIG_NUM,
-  CLEAR_CELL,
   SET_RESTRICTED_CELLS,
   CLEAR_RESTRICTED_CELLS,
   SET_SELECTED_CELLS,
@@ -17,10 +13,15 @@ import {
   CLEAR_PUSSLE,
   SET_SELECTED_MODE,
   TOGGLE_MODE,
-  SET_COLOR,
+  HistoryAction,
+  ADD_TO_HISTORY,
+  UNDO,
+  REDO,
+  Board,
+  CLEAR_HISTORY,
 } from '../types';
-import { findRestrictedCells, isValidNumber } from '../utils';
 
+const defaultHistoryState: Board[] = [];
 const defaultBoardState: Cell[] = [];
 const defaultGeneralState = {
   isLoading: true,
@@ -29,6 +30,42 @@ const defaultGeneralState = {
   mode: 'normal',
   restrictedCells: [],
   selectedCells: [],
+};
+
+const historyReducer = (state = defaultHistoryState, action: HistoryAction) => {
+  const { payload } = action;
+  let filtered: Board[];
+  let board: Board;
+  let startIndex: number;
+
+  switch (action.type) {
+    case ADD_TO_HISTORY:
+      if (state.length > 1) {
+        startIndex = state.findIndex((el) => el.id === 0);
+        if (startIndex > 0) {
+          filtered = state.filter((_el, i) => i >= startIndex);
+          return [...filtered, { id: state.length, board: payload.board }];
+        }
+      }
+      return [...state, { id: state.length, board: payload.board }];
+
+    case CLEAR_HISTORY:
+      return [{ id: state.length, board: payload.board }];
+
+    case UNDO:
+      if (state.length < 2) return state;
+      filtered = state.filter((_el, i) => i !== state.length - 1);
+      board = state[state.length - 1];
+      return [board, ...filtered];
+
+    case REDO:
+      if (state[0].id === 0) return state;
+      filtered = state.filter((el) => el.id !== state[0].id);
+      [board] = state;
+      return [...filtered, board];
+    default:
+      return state;
+  }
 };
 
 const generalReducer = (state = defaultGeneralState, action: GeneralAction) => {
@@ -62,94 +99,10 @@ const generalReducer = (state = defaultGeneralState, action: GeneralAction) => {
 
 const boardReducer = (state = defaultBoardState, action: BoardAction) => {
   const { payload } = action;
-  let filteredBoard: Cell[] = [];
-  let targetCell: Cell | undefined;
-  let restrictedCells: string[] = [];
 
   switch (action.type) {
     case SET_PUSSLE:
       return payload.cell;
-
-    case SET_CORNER_PENCIL:
-      filteredBoard = state.filter((el) => el.id !== payload.cellId);
-      targetCell = state.find((el) => el.id === payload.cellId);
-
-      if (targetCell?.locked) return state;
-      if (!isValidNumber(payload.number)) return state;
-      if (targetCell?.cornerPencil.includes(payload.number)) {
-        targetCell = {
-          ...targetCell,
-          cornerPencil: targetCell.cornerPencil.filter((el) => (
-            el !== payload.number
-          )),
-        };
-      } else {
-        targetCell = {
-          ...targetCell!,
-          cornerPencil: [...targetCell!.cornerPencil, payload.number],
-        };
-      }
-      return [...filteredBoard, targetCell];
-
-    case SET_CENTER_PENCIL:
-      filteredBoard = state.filter((el) => el.id !== payload.cellId);
-      targetCell = state.find((el) => el.id === payload.cellId);
-
-      if (targetCell?.locked) return state;
-      if (!isValidNumber(payload.number)) return state;
-      if (targetCell?.centerPencil.includes(payload.number)) {
-        targetCell = {
-          ...targetCell,
-          centerPencil: targetCell.centerPencil.filter((el) => (
-            el !== payload.number
-          )),
-        };
-      } else {
-        targetCell = {
-          ...targetCell!,
-          centerPencil: [...targetCell!.centerPencil, payload.number],
-        };
-      }
-      return [...filteredBoard, targetCell];
-
-    case SET_BIG_NUM:
-      restrictedCells = findRestrictedCells(payload.cellId);
-      filteredBoard = state.filter((el) => el.id !== payload.cellId);
-      targetCell = state.find((el) => el.id === payload.cellId);
-
-      if (targetCell?.locked) return state;
-      if (!isValidNumber(payload.number)) return state;
-
-      filteredBoard = filteredBoard.map((cell) => {
-        if (!restrictedCells.includes(cell.id)) return cell;
-        if (cell.locked) return cell;
-        const newCenter = cell.centerPencil.filter((num) => num !== payload.number);
-        const newCorner = cell.cornerPencil.filter((num) => num !== payload.number);
-        return { ...cell, cornerPencil: newCorner, centerPencil: newCenter };
-      });
-
-      targetCell = { ...targetCell!, bigNum: payload.number };
-      return [...filteredBoard, targetCell];
-
-    case SET_COLOR:
-      filteredBoard = state.filter((el) => el.id !== payload.cellId);
-      targetCell = state.find((el) => el.id === payload.cellId);
-
-      if (targetCell?.locked) return state;
-      if (!isValidNumber(payload.number)) return state;
-
-      targetCell = { ...targetCell!, color: payload.number };
-      return [...filteredBoard, targetCell];
-
-    case CLEAR_CELL:
-      filteredBoard = state.filter((el) => el.id !== payload.cellId);
-      targetCell = state.find((el) => el.id === payload.cellId);
-
-      if (targetCell?.locked) return state;
-      targetCell = {
-        ...targetCell!, bigNum: '', cornerPencil: [], centerPencil: [],
-      };
-      return [...filteredBoard, targetCell];
 
     case CLEAR_PUSSLE:
       return state.map((cell) => {
@@ -170,4 +123,5 @@ const boardReducer = (state = defaultBoardState, action: BoardAction) => {
 export default combineReducers({
   board: boardReducer,
   general: generalReducer,
+  history: historyReducer,
 });

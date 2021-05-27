@@ -8,21 +8,18 @@ import {
 import {
   RootState,
   BoardProps,
-  CLEAR_CELL,
   CLEAR_RESTRICTED_CELLS,
-  SET_BIG_NUM,
-  SET_CENTER_PENCIL,
-  SET_CORNER_PENCIL,
   SET_IS_LOADING,
   SET_RESTRICTED_CELLS,
   SET_SELECTED_CELLS,
   TOGGLE_MODE,
-  SET_COLOR,
+  SET_PUSSLE,
+  ADD_TO_HISTORY,
 } from '../types';
 import Cell from './Cell';
 import {
   findNextCell,
-  findRestrictedCells, isOtherValidKey, isValidNumber,
+  findRestrictedCells, isOtherValidKey, isValidNumber, updateBoard,
 } from '../utils';
 
 const Board = (props: BoardProps): JSX.Element => {
@@ -31,6 +28,8 @@ const Board = (props: BoardProps): JSX.Element => {
     isLoading,
     selectedCells,
     selectedMode,
+    history,
+    board,
     loadPussle,
     dispatch,
   } = props;
@@ -41,7 +40,13 @@ const Board = (props: BoardProps): JSX.Element => {
     dispatch(SET_IS_LOADING, { isLoading: false });
   }, []);
 
-  // update restricted cells
+  // Update board when history changes
+  useEffect(() => {
+    if (!history.length) return;
+    dispatch(SET_PUSSLE, { cell: history[history.length - 1].board });
+  }, [history]);
+
+  // update restricted cells when selected cells update
   useEffect(() => {
     if (selectedCells && selectedCells.length === 1) {
       const restrictedCells = findRestrictedCells(selectedCells[0]);
@@ -72,6 +77,7 @@ const Board = (props: BoardProps): JSX.Element => {
     if (e.repeat) return;
     if (!isValidNumber(e.key) && !isOtherValidKey(e.key)) return;
     e.preventDefault();
+    let newBoard = [...board];
 
     switch (e.key) {
       case ' ':
@@ -79,10 +85,12 @@ const Board = (props: BoardProps): JSX.Element => {
         break;
       // Delete keys
       case 'Backspace':
-        selectedCells.forEach((el) => dispatch(CLEAR_CELL, { cellId: el }));
+        selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, '1', 'delete'); });
+        dispatch(ADD_TO_HISTORY, { board: newBoard });
         break;
       case 'Delete':
-        selectedCells.forEach((el) => dispatch(CLEAR_CELL, { cellId: el }));
+        selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, '1', 'delete'); });
+        dispatch(ADD_TO_HISTORY, { board: newBoard });
         break;
       // Arrow Keys
       case 'ArrowDown':
@@ -100,14 +108,15 @@ const Board = (props: BoardProps): JSX.Element => {
       // Numbers
       default:
         if (e.altKey || selectedMode === 'corner') {
-          selectedCells.forEach((el) => dispatch(SET_CORNER_PENCIL, { cellId: el, number: e.key }));
+          selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, e.key, 'corner'); });
         } else if (e.ctrlKey || e.metaKey || selectedMode === 'center') {
-          selectedCells.forEach((el) => dispatch(SET_CENTER_PENCIL, { cellId: el, number: e.key }));
+          selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, e.key, 'center'); });
         } else if (selectedMode === 'color') {
-          selectedCells.forEach((el) => dispatch(SET_COLOR, { cellId: el, number: e.key }));
+          selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, e.key, 'color'); });
         } else {
-          selectedCells.forEach((el) => dispatch(SET_BIG_NUM, { cellId: el, number: e.key }));
+          selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, e.key, 'normal'); });
         }
+        dispatch(ADD_TO_HISTORY, { board: newBoard });
     }
   };
 
@@ -140,6 +149,8 @@ const mapStateToProps = (state: RootState) => ({
   isLoading: state.general.isLoading,
   selectedCells: state.general.selectedCells,
   selectedMode: state.general.mode,
+  history: state.history,
+  board: state.board,
 });
 
 export default connect(mapStateToProps, {

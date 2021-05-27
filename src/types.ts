@@ -7,7 +7,8 @@ export type RootState = {
     mode: Mode;
     restrictedCells: string[];
     selectedCells: string[];
-  }
+  },
+  history: Board[];
 };
 
 // PROPS
@@ -18,7 +19,9 @@ export type HomeProps = {
 export type ControlsProps = {
   selectedCells: string[];
   selectedMode: Mode;
-  loadPussle: (blank: boolean, pussle?: Record<string, string>) => void;
+  history: Board[];
+  board: Cell[];
+  loadPussle: (blank: boolean, pussle?: Record<string, string>, userCreated?: boolean) => void;
   dispatch: (type: string, payload: Record<string, any>) => void;
 };
 
@@ -26,6 +29,8 @@ export type BoardProps = {
   isLoading: boolean;
   selectedCells: string[];
   selectedMode: Mode;
+  history: Board[];
+  board: Cell[];
   dispatch: (type: string, payload: Record<string, any>) => void;
   loadPussle: (blank: boolean, pussle?: Record<string, string>) => void;
 };
@@ -66,6 +71,13 @@ export type GeneralAction = {
   };
 };
 
+export type HistoryAction = {
+  type: string;
+  payload: {
+    board: Cell[],
+  };
+};
+
 // OTHER
 export type Cell = {
   id: string;
@@ -76,6 +88,11 @@ export type Cell = {
   color: string;
 };
 
+export type Board = {
+  id: number;
+  board: Cell[];
+};
+
 export type Mode = 'normal' | 'corner' | 'center' | 'color';
 
 // ACTION TYPES
@@ -83,14 +100,13 @@ export const SET_PUSSLE = 'SET_PUSSLE';
 export const SET_IS_LOADING = 'SET_IS_LOADING';
 export const SET_SELECTING = 'SET_SELECTING';
 export const SET_MOUSE_DOWN = 'SET_MOUSE_DOWN';
-export const SET_CORNER_PENCIL = 'SET_CORNER_PENCIL';
-export const SET_CENTER_PENCIL = 'SET_CENTER_PENCIL';
-export const SET_BIG_NUM = 'SET_BIG_NUM';
-export const SET_COLOR = 'SET_COLOR';
-export const CLEAR_CELL = 'CLEAR_CELL';
 export const CLEAR_PUSSLE = 'CLEAR_PUSSLE';
 export const CLEAR_RESTRICTED_CELLS = 'CLEAR_RESTRICTED_CELLS';
 export const SET_RESTRICTED_CELLS = 'SET_RESTRICTED_CELLS';
 export const SET_SELECTED_CELLS = 'SET_SELECTED_CELLS';
 export const SET_SELECTED_MODE = 'SET_SELECTED_MODE';
 export const TOGGLE_MODE = 'TOGGLE_MODE';
+export const ADD_TO_HISTORY = 'ADD_TO_HISTORY';
+export const CLEAR_HISTORY = 'CLEAR_HISTORY';
+export const UNDO = 'UNDO';
+export const REDO = 'REDO';

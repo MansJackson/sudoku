@@ -1,10 +1,12 @@
 import { Dispatch } from 'redux';
 import {
+  ADD_TO_HISTORY,
   Cell,
+  CLEAR_HISTORY,
   SET_PUSSLE,
 } from '../types';
 
-export const loadPussleA = (blank: boolean, pussle?: Record<string, string>) => (
+export const loadPussleA = (blank: boolean, pussle?: Record<string, string>, userCreated?: boolean) => (
   dispatch: Dispatch,
 ): void => {
   const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
@@ -35,6 +37,21 @@ export const loadPussleA = (blank: boolean, pussle?: Record<string, string>) => 
       cell: setup,
     },
   });
+  if (userCreated) {
+    dispatch({
+      type: ADD_TO_HISTORY,
+      payload: {
+        board: setup,
+      },
+    });
+  } else {
+    dispatch({
+      type: CLEAR_HISTORY,
+      payload: {
+        board: setup,
+      },
+    });
+  }
 };
 
 export const dispatchA = (type: string, payload: any) => (dispatch: Dispatch): void => {

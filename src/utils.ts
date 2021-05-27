@@ -1,3 +1,5 @@
+import { Cell, Mode } from './types';
+
 export const isValidNumber = (input: string): boolean => (
   Number.isInteger(Number(input)) && Number(input) > 0
 );
@@ -49,36 +51,6 @@ export const findRestrictedCells = (cellId: string): string[] => {
   return cells;
 };
 
-export const convertShiftNumber = (input: string): string | false => {
-  switch (input) {
-    case '!': return '1';
-    case '"': return '2';
-    case '#': return '3';
-    case '¤': return '4';
-    case '%': return '5';
-    case '&': return '6';
-    case '/': return '7';
-    case '(': return '8';
-    case ')': return '9';
-    default: return false;
-  }
-};
-
-export const convertNumLockShift = (input: string): string | false => {
-  switch (input) {
-    case 'End': return '1';
-    case 'ArrowDown': return '2';
-    case 'PageDown': return '3';
-    case 'ArrowLeft': return '4';
-    case 'Clear': return '5';
-    case 'ArrowRight': return '6';
-    case 'Home': return '7';
-    case 'ArrowUp': return '8';
-    case 'PageUp': return '9';
-    default: return false;
-  }
-};
-
 export const isPussleSolved = (pussle: string[]): boolean => {
   let row: string[] = [];
   let column: string[] = [];
@@ -128,5 +100,85 @@ export const findNextCell = (cellId: string, direction: 'up' | 'down' | 'left' |
       return `${columns[cIndex + 1]}${row}`;
     default:
       return false;
+  }
+};
+
+export const updateBoard = (state: Cell[], cellId: string, number: string, mode: Mode | 'delete' | 'restart'): Cell[] => {
+  let filteredBoard = state.filter((el) => el.id !== cellId);
+  let targetCell = state.find((el) => el.id === cellId);
+  let restrictedCells: string[];
+
+  if (targetCell?.locked) return state;
+  if (!isValidNumber(number)) return state;
+
+  switch (mode) {
+    case 'corner':
+      if (targetCell?.cornerPencil.includes(number)) {
+        targetCell = {
+          ...targetCell,
+          cornerPencil: targetCell.cornerPencil.filter((el) => (
+            el !== number
+          )),
+        };
+      } else {
+        targetCell = {
+          ...targetCell!,
+          cornerPencil: [...targetCell!.cornerPencil, number],
+        };
+      }
+      return [...filteredBoard, targetCell];
+
+    case 'center':
+      if (targetCell?.centerPencil.includes(number)) {
+        targetCell = {
+          ...targetCell,
+          centerPencil: targetCell.centerPencil.filter((el) => (
+            el !== number
+          )),
+        };
+      } else {
+        targetCell = {
+          ...targetCell!,
+          centerPencil: [...targetCell!.centerPencil, number],
+        };
+      }
+      return [...filteredBoard, targetCell];
+
+    case 'normal':
+      restrictedCells = findRestrictedCells(cellId);
+      filteredBoard = filteredBoard.map((cell) => {
+        if (!restrictedCells.includes(cell.id)) return cell;
+        if (cell.locked) return cell;
+        const newCenter = cell.centerPencil.filter((num) => num !== number);
+        const newCorner = cell.cornerPencil.filter((num) => num !== number);
+        return { ...cell, cornerPencil: newCorner, centerPencil: newCenter };
+      });
+
+      targetCell = { ...targetCell!, bigNum: number };
+      return [...filteredBoard, targetCell];
+
+    case 'color':
+      targetCell = { ...targetCell!, color: number };
+      return [...filteredBoard, targetCell];
+
+    case 'delete':
+      if (targetCell?.locked) return state;
+      targetCell = {
+        ...targetCell!, bigNum: '', cornerPencil: [], centerPencil: [],
+      };
+      return [...filteredBoard, targetCell];
+
+    case 'restart':
+      return state.map((cell) => {
+        if (cell.locked) return cell;
+        return {
+          ...cell,
+          bigNum: '',
+          cornerPencil: [],
+          centerPencil: [],
+        };
+      });
+
+    default: return state;
   }
 };
