@@ -16,6 +16,7 @@ import {
   SET_IS_LOADING,
   SET_RESTRICTED_CELLS,
   SET_SELECTED_CELLS,
+  SET_PUSSLE,
 } from '../types';
 import Cell from './Cell';
 import {
@@ -28,6 +29,7 @@ const Board = (props: BoardProps): JSX.Element => {
   const {
     isLoading,
     selectedCells,
+    board,
     loadPussle,
     dispatch,
   } = props;
@@ -69,19 +71,14 @@ const Board = (props: BoardProps): JSX.Element => {
     if (e.repeat) return;
     if (!isValidNumber(e.key) && !isArrowOrDelKey(e.key)) return;
     e.preventDefault();
-    const cells = document.querySelectorAll('.cell');
 
     switch (e.key) {
       // Delete keys
       case 'Backspace':
-        cells.forEach((el) => {
-          if (el.classList.contains('selected')) dispatch(CLEAR_CELL, { cellId: el.id });
-        });
+        selectedCells.forEach((el) => dispatch(CLEAR_CELL, { cellId: el }));
         break;
       case 'Delete':
-        cells.forEach((el) => {
-          if (el.classList.contains('selected')) dispatch(CLEAR_CELL, { cellId: el.id });
-        });
+        selectedCells.forEach((el) => dispatch(CLEAR_CELL, { cellId: el }));
         break;
       // Arrow Keys
       case 'ArrowDown':
@@ -99,18 +96,24 @@ const Board = (props: BoardProps): JSX.Element => {
       // Numbers
       default:
         if (e.altKey) {
-          cells.forEach((el) => {
-            if (el.classList.contains('selected')) dispatch(SET_CORNER_PENCIL, { cellId: el.id, number: e.key });
-          });
+          selectedCells.forEach((el) => dispatch(SET_CORNER_PENCIL, { cellId: el, number: e.key }));
         } else if (e.ctrlKey || e.metaKey) {
-          cells.forEach((el) => {
-            if (el.classList.contains('selected')) dispatch(SET_CENTER_PENCIL, { cellId: el.id, number: e.key });
-          });
+          selectedCells.forEach((el) => dispatch(SET_CENTER_PENCIL, { cellId: el, number: e.key }));
         } else {
-          cells.forEach((el) => {
-            if (el.classList.contains('selected')) {
-              dispatch(SET_BIG_NUM, { cellId: el.id, number: e.key });
-            }
+          // Updates pencil marks in restricted cells
+          selectedCells.forEach((el) => {
+            const restrictedCells = findRestrictedCells(el);
+            const boardCopy = [...board];
+            const newBoard = boardCopy.map((cell) => {
+              if (!restrictedCells.includes(cell.id)) return cell;
+              if (cell.locked) return cell;
+              const newCenter = cell.centerPencil.filter((num) => num !== e.key);
+              const newCorner = cell.cornerPencil.filter((num) => num !== e.key);
+              return { ...cell, cornerPencil: newCorner, centerPencil: newCenter };
+            });
+
+            dispatch(SET_PUSSLE, { cell: newBoard });
+            dispatch(SET_BIG_NUM, { cellId: el, number: e.key });
           });
         }
     }
@@ -170,6 +173,7 @@ const Board = (props: BoardProps): JSX.Element => {
 const mapStateToProps = (state: RootState) => ({
   isLoading: state.general.isLoading,
   selectedCells: state.general.selectedCells,
+  board: state.board,
 });
 
 export default connect(mapStateToProps, {

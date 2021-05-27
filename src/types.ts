@@ -18,6 +18,7 @@ export type HomeProps = {
 export type BoardProps = {
   isLoading: boolean;
   selectedCells: string[];
+  board: Cell[];
   dispatch: (type: string, payload: Record<string, any>) => void;
   loadPussle: (blank: boolean, pussle?: Record<string, string>) => void;
 };
