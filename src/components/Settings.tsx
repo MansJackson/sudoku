@@ -22,9 +22,6 @@ const Settings = (props: SettingsProps): JSX.Element => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(UPDATE_SETTINGS, { [e.target.name]: e.target.checked });
-    if (e.target.name === 'highlightErrors') {
-      dispatch(e.target.checked ? UPDATE_ERRORS : CLEAR_ERRORS, {});
-    }
   };
 
   return (

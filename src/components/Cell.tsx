@@ -16,6 +16,7 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
     mouseDown,
     selectedCells,
     restrictedCells,
+    settings,
     dispatch,
   } = props;
   const content = board.find((el) => el.id === id);
@@ -106,8 +107,8 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
       className={`
         cell
         ${content?.locked ? 'locked' : ''}
-        ${content?.error ? 'error' : ''}
-        ${restricted ? 'restricted' : ''}
+        ${content?.error && settings.highlightErrors ? 'error' : ''}
+        ${restricted && settings.markRestricted ? 'restricted' : ''}
         ${selected ? 'selected' : ''}
         bg_${content?.color || ''}
       `}
@@ -127,6 +128,7 @@ const mapStateToProps = (state: RootState, ownProps: CellOwnProps) => ({
   mouseDown: state.general.mouseDown,
   selectedCells: state.general.selectedCells,
   restrictedCells: state.general.restrictedCells,
+  settings: state.general.settings,
 });
 
 export default connect(mapStateToProps, {

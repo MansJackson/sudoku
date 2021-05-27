@@ -66,6 +66,11 @@ export type CellProps = {
   mouseDown: boolean;
   selectedCells: string[];
   restrictedCells: string[];
+  settings: {
+    markRestricted: boolean,
+    highlightErrors: boolean,
+    removePencilMarks: boolean,
+  }
   dispatch: (type: string, payload: Record<string, any>) => void;
 };
 
