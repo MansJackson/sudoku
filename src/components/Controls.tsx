@@ -11,6 +11,7 @@ import {
   RootState,
   SET_BIG_NUM,
   SET_CENTER_PENCIL,
+  SET_COLOR,
   SET_CORNER_PENCIL,
   SET_SELECTED_MODE,
 } from '../types';
@@ -57,7 +58,7 @@ const Controls = (props: ControlsProps): JSX.Element => {
     dispatch(SET_SELECTED_MODE, { mode });
   };
 
-  const setNumber = (number: string) => {
+  const setContent = (number: string) => {
     switch (selectedMode) {
       case 'normal':
         selectedCells.forEach((el) => dispatch(SET_BIG_NUM, { cellId: el, number }));
@@ -67,6 +68,9 @@ const Controls = (props: ControlsProps): JSX.Element => {
         break;
       case 'center':
         selectedCells.forEach((el) => dispatch(SET_CENTER_PENCIL, { cellId: el, number }));
+        break;
+      case 'color':
+        selectedCells.forEach((el) => dispatch(SET_COLOR, { cellId: el, number }));
         break;
       default:
         selectedCells.forEach((el) => dispatch(SET_BIG_NUM, { cellId: el, number }));
@@ -85,29 +89,29 @@ const Controls = (props: ControlsProps): JSX.Element => {
         Normal
       </Button>
       <Button
-        onClick={() => setNumber('1')}
+        onClick={() => setContent('1')}
         color="primary"
         variant="outlined"
         size="small"
-        className="btn btn_num"
+        className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_1 color_1' : ''}`}
       >
         1
       </Button>
       <Button
-        onClick={() => setNumber('2')}
+        onClick={() => setContent('2')}
         color="primary"
         variant="outlined"
         size="small"
-        className="btn btn_num"
+        className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_2 color_2' : ''}`}
       >
         2
       </Button>
       <Button
-        onClick={() => setNumber('3')}
+        onClick={() => setContent('3')}
         color="primary"
         variant="outlined"
         size="small"
-        className="btn btn_num"
+        className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_3 color_3' : ''}`}
       >
         3
       </Button>
@@ -121,29 +125,29 @@ const Controls = (props: ControlsProps): JSX.Element => {
         Corner
       </Button>
       <Button
-        onClick={() => setNumber('4')}
+        onClick={() => setContent('4')}
         color="primary"
         variant="outlined"
         size="small"
-        className="btn btn_num"
+        className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_4 color_4' : ''}`}
       >
         4
       </Button>
       <Button
-        onClick={() => setNumber('5')}
+        onClick={() => setContent('5')}
         color="primary"
         variant="outlined"
         size="small"
-        className="btn btn_num"
+        className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_5 color_5' : ''}`}
       >
         5
       </Button>
       <Button
-        onClick={() => setNumber('6')}
+        onClick={() => setContent('6')}
         color="primary"
         variant="outlined"
         size="small"
-        className="btn btn_num"
+        className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_6 color_6' : ''}`}
       >
         6
       </Button>
@@ -157,29 +161,29 @@ const Controls = (props: ControlsProps): JSX.Element => {
         Center
       </Button>
       <Button
-        onClick={() => setNumber('7')}
+        onClick={() => setContent('7')}
         color="primary"
         variant="outlined"
         size="small"
-        className="btn btn_num"
+        className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_7 color_7' : ''}`}
       >
         7
       </Button>
       <Button
-        onClick={() => setNumber('8')}
+        onClick={() => setContent('8')}
         color="primary"
         variant="outlined"
         size="small"
-        className="btn btn_num"
+        className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_8 color_8' : ''}`}
       >
         8
       </Button>
       <Button
-        onClick={() => setNumber('9')}
+        onClick={() => setContent('9')}
         color="primary"
         variant="outlined"
         size="small"
-        className="btn btn_num"
+        className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_9 color_9' : ''}`}
       >
         9
       </Button>

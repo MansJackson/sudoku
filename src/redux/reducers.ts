@@ -17,6 +17,7 @@ import {
   CLEAR_PUSSLE,
   SET_SELECTED_MODE,
   TOGGLE_MODE,
+  SET_COLOR,
 } from '../types';
 import { findRestrictedCells, isValidNumber } from '../utils';
 
@@ -128,6 +129,16 @@ const boardReducer = (state = defaultBoardState, action: BoardAction) => {
       });
 
       targetCell = { ...targetCell!, bigNum: payload.number };
+      return [...filteredBoard, targetCell];
+
+    case SET_COLOR:
+      filteredBoard = state.filter((el) => el.id !== payload.cellId);
+      targetCell = state.find((el) => el.id === payload.cellId);
+
+      if (targetCell?.locked) return state;
+      if (!isValidNumber(payload.number)) return state;
+
+      targetCell = { ...targetCell!, color: payload.number };
       return [...filteredBoard, targetCell];
 
     case CLEAR_CELL:

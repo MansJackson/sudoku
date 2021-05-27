@@ -23,6 +23,7 @@ export const loadPussleA = (blank: boolean, pussle?: Record<string, string>) => 
           cornerPencil: [],
           bigNum: exists ? pussle![id as keyof typeof pussle] : '',
           locked: exists,
+          color: '1',
         },
       ];
     }

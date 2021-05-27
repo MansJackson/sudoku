@@ -73,6 +73,7 @@ export type Cell = {
   bigNum: string;
   cornerPencil: string[];
   centerPencil: string[];
+  color: string;
 };
 
 export type Mode = 'normal' | 'corner' | 'center' | 'color';
@@ -85,6 +86,7 @@ export const SET_MOUSE_DOWN = 'SET_MOUSE_DOWN';
 export const SET_CORNER_PENCIL = 'SET_CORNER_PENCIL';
 export const SET_CENTER_PENCIL = 'SET_CENTER_PENCIL';
 export const SET_BIG_NUM = 'SET_BIG_NUM';
+export const SET_COLOR = 'SET_COLOR';
 export const CLEAR_CELL = 'CLEAR_CELL';
 export const CLEAR_PUSSLE = 'CLEAR_PUSSLE';
 export const CLEAR_RESTRICTED_CELLS = 'CLEAR_RESTRICTED_CELLS';

@@ -6,6 +6,7 @@
 .btn {
   margin-bottom: 1% !important;
   min-width: none !important;
+  font-size: 1rem !important;
 }
 
 .btn_num {
@@ -38,4 +39,85 @@
 
 .btn_extra:nth-child(odd) {
   margin-right: 3% !important;
+}
+
+.num_center {
+  font-weight: 600 !important;
+}
+
+.num_corner>span {
+  display: inline-block;
+  text-align: left;
+}
+
+.color_1 {
+  color: rgb(255, 255, 255) !important;
+}
+
+.color_2 {
+  color: rgba(255, 0, 0) !important;
+}
+
+.color_3 {
+  color: rgba(229, 255, 0) !important;
+}
+
+.color_4 {
+  color: rgba(0, 255, 0) !important;
+}
+
+.color_5 {
+  color: rgba(0, 229, 255) !important;
+}
+
+.color_6 {
+  color: rgba(0, 4, 255) !important;
+}
+
+.color_7 {
+  color: rgb(255, 0, 212) !important;
+}
+
+.color_8 {
+  color: rgba(255, 136, 0) !important;
+}
+
+.color_9 {
+  color: rgb(153, 0, 255) !important;
+}
+
+.background_1 {
+  background-color: rgb(255, 255, 255) !important;
+}
+
+.background_2 {
+  background-color: rgba(255, 0, 0) !important;
+}
+
+.background_3 {
+  background-color: rgba(229, 255, 0) !important;
+}
+
+.background_4 {
+  background-color: rgba(0, 255, 0) !important;
+}
+
+.background_5 {
+  background-color: rgba(0, 229, 255) !important;
+}
+
+.background_6 {
+  background-color: rgba(0, 4, 255) !important;
+}
+
+.background_7 {
+  background-color: rgb(255, 0, 212) !important;
+}
+
+.background_8 {
+  background-color: rgba(255, 136, 0) !important;
+}
+
+.background_9 {
+  background-color: rgb(153, 0, 255) !important;
 }

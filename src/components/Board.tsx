@@ -17,6 +17,7 @@ import {
   SET_RESTRICTED_CELLS,
   SET_SELECTED_CELLS,
   TOGGLE_MODE,
+  SET_COLOR,
 } from '../types';
 import Cell from './Cell';
 import {
@@ -102,6 +103,8 @@ const Board = (props: BoardProps): JSX.Element => {
           selectedCells.forEach((el) => dispatch(SET_CORNER_PENCIL, { cellId: el, number: e.key }));
         } else if (e.ctrlKey || e.metaKey || selectedMode === 'center') {
           selectedCells.forEach((el) => dispatch(SET_CENTER_PENCIL, { cellId: el, number: e.key }));
+        } else if (selectedMode === 'color') {
+          selectedCells.forEach((el) => dispatch(SET_COLOR, { cellId: el, number: e.key }));
         } else {
           selectedCells.forEach((el) => dispatch(SET_BIG_NUM, { cellId: el, number: e.key }));
         }
