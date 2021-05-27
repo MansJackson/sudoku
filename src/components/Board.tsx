@@ -6,10 +6,10 @@ import {
   loadPussleA,
 } from '../redux/actions';
 import {
+  RootState,
   BoardProps,
   CLEAR_CELL,
   CLEAR_RESTRICTED_CELLS,
-  RootState,
   SET_BIG_NUM,
   SET_CENTER_PENCIL,
   SET_CORNER_PENCIL,
@@ -50,6 +50,7 @@ const Board = (props: BoardProps): JSX.Element => {
 
   const targetNextCell = (shift: boolean, direction: 'up' | 'down' | 'left' | 'right') => {
     const nextCell = findNextCell(selectedCells[selectedCells.length - 1], direction);
+    if (!nextCell) return;
     if (shift) {
       dispatch(
         SET_SELECTED_CELLS,

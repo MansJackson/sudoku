@@ -88,13 +88,14 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
   };
 
   const renderCellContent = () => {
+    let render: JSX.Element[] = [];
     if (content?.bigNum) return <div className={`big_num ${content.locked ? 'locked' : ''}`}>{content.bigNum}</div>;
-    if (content?.centerPencil.length) return <div className="center_pencil">{content.centerPencil}</div>;
+    if (content?.centerPencil.length) render = [<div key={`center_${content.id}`} className="center_pencil">{content.centerPencil}</div>];
     if (content?.cornerPencil.length) {
       const mapped = content.cornerPencil.map((el, i) => <div key={el} className={`corner_${i}`}>{el}</div>);
-      return <div className="corner_pencil">{mapped}</div>;
+      render = [...render, <div key={`corner_${content.id}`} className="corner_pencil">{mapped}</div>];
     }
-    return '';
+    return render;
   };
 
   return (

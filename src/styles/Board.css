@@ -42,6 +42,7 @@
 }
 
 .center_pencil {
+  position: absolute;
   display: flex;
   justify-content: center;
   align-items: center;
