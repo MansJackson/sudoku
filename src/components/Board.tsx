@@ -2,81 +2,48 @@ import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import '../styles/Board.css';
 import {
-  clearCellA,
-  clearRestrictedCellsA,
+  dispatchA,
   loadPussleA,
-  setBigNumA,
-  setCenterPencilA,
-  setCornerPencilA,
-  setIsLoadingA,
-  setKeyA,
-  setRestrictedCellsA,
 } from '../redux/actions';
-import { BoardProps, RootState } from '../types';
+import {
+  BoardProps,
+  CLEAR_CELL,
+  CLEAR_RESTRICTED_CELLS,
+  RootState,
+  SET_BIG_NUM,
+  SET_CENTER_PENCIL,
+  SET_CORNER_PENCIL,
+  SET_IS_LOADING,
+  SET_RESTRICTED_CELLS,
+} from '../types';
 import Cell from './Cell';
-import { convertNumLockShift, convertShiftNumber, isPussleSolved } from '../utils';
+import {
+  findRestrictedCells, isPussleSolved,
+} from '../utils';
 
 const Board = (props: BoardProps): JSX.Element => {
   const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
   const {
     isLoading,
-    keys,
     selectedCells,
     loadPussle,
-    setIsLoading,
-    setKey,
-    setBigNum,
-    setCornerPencil,
-    setCenterPencil,
-    clearCell,
-    setRestrictedCells,
-    clearRestrictedCells,
+    dispatch,
   } = props;
 
-  // KeyUp Event Listener
-  useEffect(() => {
-    document.addEventListener('keyup', (e) => {
-      if (e.key === 'Shift') setKey({ shift: false });
-      if (e.key === 'Control') setKey({ ctrl: false });
-      if (e.key === 'Meta') setKey({ meta: false });
-    });
-
-    return (
-      document.removeEventListener('keyup', (e) => {
-        if (e.key === 'Shift') setKey({ shift: false });
-        if (e.key === 'Control') setKey({ ctrl: false });
-        if (e.key === 'Meta') setKey({ meta: false });
-      })
-    );
-  }, []);
-
-  // KeyDown Event Listener
-  useEffect(() => {
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Shift') if (!keys.shift) setKey({ shift: true });
-      if (e.key === 'Control') if (!keys.ctrl) setKey({ ctrl: true });
-      if (e.key === 'Meta') if (!keys.ctrl) setKey({ meta: true });
-    });
-
-    return (
-      document.removeEventListener('keydown', (e) => {
-        if (e.key === 'Shift') if (!keys.shift) setKey({ shift: true });
-        if (e.key === 'Control') if (!keys.ctrl) setKey({ ctrl: true });
-        if (e.key === 'Meta') if (!keys.ctrl) setKey({ meta: true });
-      })
-    );
-  }, []);
-
-  // LoadPussle
+  // Load an empty board on mount
   useEffect(() => {
     loadPussle(true);
-    setIsLoading(false);
+    dispatch(SET_IS_LOADING, { isLoading: false });
   }, []);
 
   // update restricted cells
   useEffect(() => {
-    if (selectedCells.length === 1) setRestrictedCells(selectedCells[0]);
-    else clearRestrictedCells();
+    if (selectedCells.length === 1) {
+      const restrictedCells = findRestrictedCells(selectedCells[0]);
+      dispatch(SET_RESTRICTED_CELLS, { restrictedCells });
+    } else {
+      dispatch(CLEAR_RESTRICTED_CELLS, {});
+    }
   }, [selectedCells]);
 
   // Handles inputs
@@ -85,41 +52,34 @@ const Board = (props: BoardProps): JSX.Element => {
     e.preventDefault();
     if (e.repeat) return;
 
-    if (e.key === 'Backspace') {
+    if (e.key === 'Backspace' || e.key === 'Delete') {
       cells.forEach((el) => {
-        if (el.classList.contains('selected')) clearCell(el.id);
+        if (el.classList.contains('selected')) dispatch(CLEAR_CELL, { cellId: el.id });
       });
       return;
     }
-    if (e.getModifierState('NumLock') && convertNumLockShift(e.key)) {
-      const key = convertNumLockShift(e.key);
-      if (!key) return;
+    if (e.altKey) {
       cells.forEach((el) => {
-        if (el.classList.contains('selected')) setCornerPencil(el.id, key);
+        if (el.classList.contains('selected')) dispatch(SET_CORNER_PENCIL, { cellId: el.id, number: e.key });
       });
-    } else if (keys.shift) {
-      const key = convertShiftNumber(e.key);
-      if (!key) return;
+    } else if (e.ctrlKey) {
       cells.forEach((el) => {
-        if (el.classList.contains('selected')) setCornerPencil(el.id, key);
+        if (el.classList.contains('selected')) dispatch(SET_CENTER_PENCIL, { cellId: el.id, number: e.key });
       });
-    } else if (keys.ctrl) {
+    } else if (e.metaKey) {
       cells.forEach((el) => {
-        if (el.classList.contains('selected')) setCenterPencil(el.id, e.key);
-      });
-    } else if (keys.meta) {
-      cells.forEach((el) => {
-        if (el.classList.contains('selected')) setCenterPencil(el.id, e.key);
+        if (el.classList.contains('selected')) dispatch(SET_CENTER_PENCIL, { cellId: el.id, number: e.key });
       });
     } else {
       cells.forEach((el) => {
         if (el.classList.contains('selected')) {
-          setBigNum(el.id, e.key);
+          dispatch(SET_BIG_NUM, { cellId: el.id, number: e.key });
         }
       });
     }
   };
 
+  // Locks a user added pussle
   const lockPussle = () => {
     const cellsToLock = document.querySelectorAll('.big_num');
     const pussle: Record<string, string> = {};
@@ -129,6 +89,7 @@ const Board = (props: BoardProps): JSX.Element => {
     loadPussle(false, pussle);
   };
 
+  // Checks if pussle is correctly solved
   const handleSolve = () => {
     let pussle: string[] = [];
     const cells = document.querySelectorAll('.big_num');
@@ -142,7 +103,7 @@ const Board = (props: BoardProps): JSX.Element => {
     }
   };
 
-  // Renders the board with content
+  // Renders the board with its content
   const renderBoard = () => {
     let cellArray: JSX.Element[] = [];
     let rowArray: JSX.Element[] = [];
@@ -170,20 +131,11 @@ const Board = (props: BoardProps): JSX.Element => {
 };
 
 const mapStateToProps = (state: RootState) => ({
-  board: state.board,
   isLoading: state.general.isLoading,
-  keys: state.keys,
   selectedCells: state.general.selectedCells,
 });
 
 export default connect(mapStateToProps, {
+  dispatch: dispatchA,
   loadPussle: loadPussleA,
-  setIsLoading: setIsLoadingA,
-  setKey: setKeyA,
-  setCornerPencil: setCornerPencilA,
-  setCenterPencil: setCenterPencilA,
-  setBigNum: setBigNumA,
-  clearCell: clearCellA,
-  setRestrictedCells: setRestrictedCellsA,
-  clearRestrictedCells: clearRestrictedCellsA,
 })(Board);

@@ -1,15 +1,10 @@
 import { combineReducers } from 'redux';
 import {
-  BoardAction,
   Cell,
-  ADD_TO_HISTORY,
   SET_PUSSLE,
-  GeneralAction,
   SET_IS_LOADING,
   SET_SELECTING,
   SET_MOUSE_DOWN,
-  KeyAction,
-  SET_KEY,
   SET_SELECTED_COUNT,
   SET_CORNER_PENCIL,
   SET_CENTER_PENCIL,
@@ -18,6 +13,8 @@ import {
   SET_RESTRICTED_CELLS,
   CLEAR_RESTRICTED_CELLS,
   SET_SELECTED_CELLS,
+  GeneralAction,
+  BoardAction,
 } from '../types';
 import { isValidNumber } from '../utils';
 
@@ -30,90 +27,94 @@ const defaultGeneralState = {
   restrictedCells: [],
   selectedCells: [],
 };
-const defaultKeyState = {
-  shift: false,
-  ctrl: false,
-  meta: false,
-};
 
 const generalReducer = (state = defaultGeneralState, action: GeneralAction) => {
+  const { payload } = action;
+
   switch (action.type) {
     case SET_IS_LOADING:
-      return { ...state, isLoading: action.isLoading };
+      return { ...state, isLoading: payload.isLoading };
     case SET_SELECTING:
-      return { ...state, selecting: action.selecting };
+      return { ...state, selecting: payload.selecting };
     case SET_MOUSE_DOWN:
-      return { ...state, mouseDown: action.mouseDown };
+      return { ...state, mouseDown: payload.mouseDown };
     case SET_SELECTED_COUNT:
-      return { ...state, selectedCount: action.selectedCount };
+      return { ...state, selectedCount: payload.selectedCount };
     case SET_RESTRICTED_CELLS:
-      return { ...state, restrictedCells: action.restrictedCells };
+      return { ...state, restrictedCells: payload.restrictedCells };
     case CLEAR_RESTRICTED_CELLS:
-      return { ...state, restrictedCells: action.restrictedCells };
+      return { ...state, restrictedCells: [] };
     case SET_SELECTED_CELLS:
-      return { ...state, selectedCells: action.selectedCells };
-    default:
-      return state;
-  }
-};
-
-const keysReducer = (state = defaultKeyState, action: KeyAction) => {
-  switch (action.type) {
-    case SET_KEY:
-      return { ...state, ...action.payload };
+      return { ...state, selectedCells: payload.selectedCells };
     default:
       return state;
   }
 };
 
 const boardReducer = (state = defaultBoardState, action: BoardAction) => {
-  const filteredBoard = state.filter((el) => el.id !== action.cellId);
-  let targetCell = state.find((el) => el.id === action.cellId);
+  const { payload } = action;
+  let filteredBoard: Cell[] = [];
+  let targetCell: Cell | undefined;
 
   switch (action.type) {
     case SET_PUSSLE:
-      return action.cell;
-
-    case ADD_TO_HISTORY:
-      return [...state, action.cell];
+      return payload.cell;
 
     case SET_CORNER_PENCIL:
+      filteredBoard = state.filter((el) => el.id !== payload.cellId);
+      targetCell = state.find((el) => el.id === payload.cellId);
+
       if (targetCell?.locked) return state;
-      if (!isValidNumber(action.number)) return state;
-      if (targetCell?.cornerPencil.includes(action.number)) {
+      if (!isValidNumber(payload.number)) return state;
+      if (targetCell?.cornerPencil.includes(payload.number)) {
         targetCell = {
           ...targetCell,
           cornerPencil: targetCell.cornerPencil.filter((el) => (
-            el !== action.number
+            el !== payload.number
           )),
         };
       } else {
-        targetCell = { ...targetCell!, cornerPencil: [...targetCell!.cornerPencil, action.number] };
+        targetCell = {
+          ...targetCell!,
+          cornerPencil: [...targetCell!.cornerPencil, payload.number],
+        };
       }
       return [...filteredBoard, targetCell];
 
     case SET_CENTER_PENCIL:
+      filteredBoard = state.filter((el) => el.id !== payload.cellId);
+      targetCell = state.find((el) => el.id === payload.cellId);
+
       if (targetCell?.locked) return state;
-      if (!isValidNumber(action.number)) return state;
-      if (targetCell?.centerPencil.includes(action.number)) {
+      if (!isValidNumber(payload.number)) return state;
+      if (targetCell?.centerPencil.includes(payload.number)) {
         targetCell = {
           ...targetCell,
           centerPencil: targetCell.centerPencil.filter((el) => (
-            el !== action.number
+            el !== payload.number
           )),
         };
       } else {
-        targetCell = { ...targetCell!, centerPencil: [...targetCell!.centerPencil, action.number] };
+        targetCell = {
+          ...targetCell!,
+          centerPencil: [...targetCell!.centerPencil, payload.number],
+        };
       }
       return [...filteredBoard, targetCell];
 
     case SET_BIG_NUM:
+      filteredBoard = state.filter((el) => el.id !== payload.cellId);
+      targetCell = state.find((el) => el.id === payload.cellId);
+
       if (targetCell?.locked) return state;
-      if (!isValidNumber(action.number)) return state;
-      targetCell = { ...targetCell!, bigNum: action.number };
+      if (!isValidNumber(payload.number)) return state;
+      targetCell = { ...targetCell!, bigNum: payload.number };
       return [...filteredBoard, targetCell];
 
     case CLEAR_CELL:
+      filteredBoard = state.filter((el) => el.id !== payload.cellId);
+      targetCell = state.find((el) => el.id === payload.cellId);
+
       if (targetCell?.locked) return state;
       targetCell = {
         ...targetCell!, bigNum: '', cornerPencil: [], centerPencil: [],
@@ -128,5 +129,4 @@ const boardReducer = (state = defaultBoardState, action: BoardAction) => {
 export default combineReducers({
   board: boardReducer,
   general: generalReducer,
-  keys: keysReducer,
 });

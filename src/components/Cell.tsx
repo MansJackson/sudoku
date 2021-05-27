@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import {
-  clearRestrictedCellsA,
-  setMouseDownA,
-  setRestrictedCellsA,
-  setSelectingA,
+  dispatchA,
   updateSelectedCellsA,
 } from '../redux/actions';
-import { CellOwnProps, CellProps, RootState } from '../types';
+import {
+  CellOwnProps, CellProps, RootState, SET_MOUSE_DOWN, SET_SELECTING,
+} from '../types';
 
 const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
   props: CellProps & CellOwnProps,
@@ -18,12 +17,10 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
     index,
     selecting,
     mouseDown,
-    keys,
     selectedCells,
     restrictedCells,
-    setSelecting,
-    setMouseDown,
     updateSelectedCells,
+    dispatch,
   } = props;
   const content = board.find((el) => el.id === id);
   const [restricted, setRestricted] = useState(false);
@@ -45,6 +42,7 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
     } else if (selected) setSelected(false);
   }, [selectedCells]);
 
+  // Should refactor this to not use classlist but state instead
   const handleMouseOver = (e: React.MouseEvent<HTMLDivElement>) => {
     const classes = e.currentTarget.classList;
     if (mouseDown) {
@@ -62,13 +60,14 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
     }
   };
 
+  // Should refactor this to not use classlist but state instead
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.nativeEvent.button !== 0) return;
     const classes = e.currentTarget.classList;
     const count = selectedCells.length;
 
     // If the shift key is not held down => clear selections
-    if (!keys.shift) {
+    if (!e.shiftKey) {
       if (count === 1 && classes.contains('selected')) {
         classes.remove('selected');
         updateSelectedCells();
@@ -82,18 +81,18 @@ const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
     // Removes or adds 'selected' to the clicked cell
     if (classes.contains('selected')) {
       classes.remove('selected');
-      setSelecting(false);
+      dispatch(SET_SELECTING, { selecting: false });
     } else {
       classes.add('selected');
-      setSelecting(true);
+      dispatch(SET_SELECTING, { selecting: true });
     }
     updateSelectedCells();
-    setMouseDown(true);
+    dispatch(SET_MOUSE_DOWN, { mouseDown: true });
   };
 
   const handleMouseUp = () => {
-    setSelecting(null);
-    setMouseDown(false);
+    dispatch(SET_SELECTING, { selecting: null });
+    dispatch(SET_MOUSE_DOWN, { mouseDown: false });
   };
 
   const renderCellContent = () => {
@@ -126,15 +125,11 @@ const mapStateToProps = (state: RootState, ownProps: CellOwnProps) => ({
   index: ownProps.index,
   selecting: state.general.selecting,
   mouseDown: state.general.mouseDown,
-  keys: state.keys,
   selectedCells: state.general.selectedCells,
   restrictedCells: state.general.restrictedCells,
 });
 
 export default connect(mapStateToProps, {
-  setSelecting: setSelectingA,
-  setMouseDown: setMouseDownA,
   updateSelectedCells: updateSelectedCellsA,
-  setRestrictedCells: setRestrictedCellsA,
-  clearRestrictedCells: clearRestrictedCellsA,
+  dispatch: dispatchA,
 })(Cell);
