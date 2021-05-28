@@ -6,8 +6,6 @@ import {
   SettingsProps,
   RootState,
   UPDATE_SETTINGS,
-  CLEAR_ERRORS,
-  UPDATE_ERRORS,
 } from '../types';
 
 const Settings = (props: SettingsProps): JSX.Element => {

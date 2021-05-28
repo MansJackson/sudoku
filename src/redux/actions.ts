@@ -48,7 +48,7 @@ export const loadPussleA = (blank: boolean, pussle?: Record<string, string>, use
   }
 };
 
-export const dispatchA = (type: string, payload: any) => (dispatch: Dispatch): void => {
+export const dispatchA = (type: string, payload: Record<string, any>) => (dispatch: Dispatch): void => {
   dispatch({
     type,
     payload,
