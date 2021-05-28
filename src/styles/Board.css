@@ -142,12 +142,12 @@
 }
 
 .selected {
-  background-color: rgba(86, 202, 231, 0.75);
+  background-color: rgba(104, 225, 255, 0.75);
   z-index: 2;
 }
 
 .restricted {
-  background-color: rgba(156, 227, 245, 0.75);
+  background-color: rgba(194, 243, 255, 0.75);
   z-index: 2;
 }
 
