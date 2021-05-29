@@ -39,6 +39,6 @@
         "jsx-a11y/mouse-events-have-key-events": 0,
         "@typescript-eslint/no-unsafe-assignment": 0,
         "max-len": ["error", 150],
-        "linebreak-style": ["warn", "windows"]
+        "linebreak-style": 0
     }
 }

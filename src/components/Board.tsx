@@ -54,8 +54,8 @@ const Board = (props: BoardProps): JSX.Element => {
       if (restrictedCells.length) dispatch(CLEAR_RESTRICTED_CELLS, {});
       return;
     }
-    if (selectedCells && selectedCells.length === 1) {
-      const restricted = findRestrictedCells(selectedCells[0]);
+    if (selectedCells) {
+      const restricted = findRestrictedCells(selectedCells);
       dispatch(SET_RESTRICTED_CELLS, { restrictedCells: restricted });
     } else {
       dispatch(CLEAR_RESTRICTED_CELLS, {});
@@ -113,9 +113,9 @@ const Board = (props: BoardProps): JSX.Element => {
         break;
       // Numbers
       default:
-        if (e.altKey || selectedMode === 'corner') {
+        if (e.altKey || e.metaKey || selectedMode === 'corner') {
           selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, e.key, 'corner'); });
-        } else if (e.ctrlKey || e.metaKey || selectedMode === 'center') {
+        } else if (e.ctrlKey || selectedMode === 'center') {
           selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, e.key, 'center'); });
         } else if (selectedMode === 'color') {
           selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, e.key, 'color'); });

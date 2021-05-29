@@ -17,38 +17,61 @@ export const isOtherValidKey = (input: string): boolean => {
   }
 };
 
-export const findRestrictedCells = (cellId: string): string[] => {
-  const row = Number(cellId[1]);
-  const column = cellId[0];
-  let boxRows: string[] = [];
-  let boxColumns: string[] = [];
-  let cells: string[] = [];
-  const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
+export const findRestrictedCells = (targetCells: string[]): string[] => {
+  let restrictedCells: string[] = [];
+  const counts: Record<string, number> = {};
+  let restrictedDuplicates: string[] = [];
 
-  if (row <= 3) boxRows = ['1', '2', '3'];
-  else if (row <= 6) boxRows = ['4', '5', '6'];
-  else boxRows = ['7', '8', '9'];
+  // Finds all restricted cells for each targetCell
+  targetCells.forEach((cellId) => {
+    const row = Number(cellId[1]);
+    const column = cellId[0];
+    let boxRows: string[] = [];
+    let boxColumns: string[] = [];
+    let cells: string[] = [];
+    const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
 
-  if (column === 'A' || column === 'B' || column === 'C') boxColumns = ['A', 'B', 'C'];
-  else if (column === 'D' || column === 'E' || column === 'F') boxColumns = ['D', 'E', 'F'];
-  if (column === 'G' || column === 'H' || column === 'I') boxColumns = ['G', 'H', 'I'];
+    if (row <= 3) boxRows = ['1', '2', '3'];
+    else if (row <= 6) boxRows = ['4', '5', '6'];
+    else boxRows = ['7', '8', '9'];
 
-  for (let x = 0; x < 3; x += 1) {
-    for (let y = 0; y < 3; y += 1) {
-      cells = [...cells, boxColumns[x] + boxRows[y]];
+    if (column === 'A' || column === 'B' || column === 'C') boxColumns = ['A', 'B', 'C'];
+    else if (column === 'D' || column === 'E' || column === 'F') boxColumns = ['D', 'E', 'F'];
+    if (column === 'G' || column === 'H' || column === 'I') boxColumns = ['G', 'H', 'I'];
+
+    for (let x = 0; x < 3; x += 1) {
+      for (let y = 0; y < 3; y += 1) {
+        cells = [...cells, boxColumns[x] + boxRows[y]];
+      }
     }
-  }
 
-  for (let i = 0; i < 9; i += 1) {
-    const cell1 = columns[i] + row.toString();
-    const cell2 = column + (i + 1).toString();
-    if (!cells.includes(cell1)) cells = [...cells, cell1];
-    if (!cells.includes(cell2)) cells = [...cells, cell2];
-  }
+    for (let i = 0; i < 9; i += 1) {
+      const cell1 = columns[i] + row.toString();
+      const cell2 = column + (i + 1).toString();
+      if (!cells.includes(cell1)) cells = [...cells, cell1];
+      if (!cells.includes(cell2)) cells = [...cells, cell2];
+    }
 
-  cells = cells.filter((el) => el !== cellId);
+    restrictedCells = [...restrictedCells, ...cells];
+  });
 
-  return cells;
+  // Removes the target cells from restricted cells
+  restrictedCells = restrictedCells.filter((cell) => !targetCells.includes(cell));
+
+  // Counts the occurance of each restricted cell
+  restrictedCells.forEach((cell) => {
+    counts[cell] = counts[cell] ? counts[cell] + 1 : 1;
+  });
+
+  // Extracts the cells that are restricted by all target cells
+  restrictedCells.forEach((cell) => {
+    if (!counts[cell]) return;
+    if (counts[cell] === targetCells.length && !restrictedDuplicates.includes(cell)) {
+      restrictedDuplicates = [...restrictedDuplicates, cell];
+    }
+  });
+
+  return restrictedDuplicates;
 };
 
 export const isPussleSolved = (board: string[]): boolean => {
@@ -107,7 +130,7 @@ const cellHasError = (board: Cell[], cellId: string): boolean => {
   const number = board.find((cell) => cell.id === cellId)?.bigNum;
   if (!number) return false;
 
-  const restrictedCells = findRestrictedCells(cellId);
+  const restrictedCells = findRestrictedCells([cellId]);
   for (let i = 0; i < restrictedCells.length; i += 1) {
     const cellNum = board.find((cell) => cell.id === restrictedCells[i])?.bigNum;
     if (cellNum === number) return true;
@@ -148,7 +171,7 @@ export const updateBoard = (
       } else {
         targetCell = {
           ...targetCell!,
-          cornerPencil: [...targetCell!.cornerPencil, number],
+          cornerPencil: [...targetCell!.cornerPencil, number].sort(),
         };
       }
       return [...filteredBoard, targetCell];
@@ -164,13 +187,13 @@ export const updateBoard = (
       } else {
         targetCell = {
           ...targetCell!,
-          centerPencil: [...targetCell!.centerPencil, number],
+          centerPencil: [...targetCell!.centerPencil, number].sort(),
         };
       }
       return [...filteredBoard, targetCell];
 
     case 'normal':
-      restrictedCells = findRestrictedCells(cellId);
+      restrictedCells = findRestrictedCells([cellId]);
       if (removePencils) {
         filteredBoard = filteredBoard.map((cell) => {
           if (!restrictedCells.includes(cell.id)) return cell;
