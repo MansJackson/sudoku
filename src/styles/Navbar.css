@@ -1,0 +1,11 @@
+.navbar {
+  width: 100vw;
+}
+
+.menu_btn {
+  margin-right: 2rem;
+}
+
+.title {
+  flex-grow: 1;
+}

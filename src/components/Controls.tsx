@@ -102,7 +102,7 @@ const Controls = (props: ControlsProps): JSX.Element => {
       <Button
         onClick={() => setContent('1')}
         color="primary"
-        variant="outlined"
+        variant="contained"
         size="small"
         className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_1 color_1' : ''}`}
       >
@@ -111,7 +111,7 @@ const Controls = (props: ControlsProps): JSX.Element => {
       <Button
         onClick={() => setContent('2')}
         color="primary"
-        variant="outlined"
+        variant="contained"
         size="small"
         className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_2 color_2' : ''}`}
       >
@@ -120,7 +120,7 @@ const Controls = (props: ControlsProps): JSX.Element => {
       <Button
         onClick={() => setContent('3')}
         color="primary"
-        variant="outlined"
+        variant="contained"
         size="small"
         className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_3 color_3' : ''}`}
       >
@@ -138,7 +138,7 @@ const Controls = (props: ControlsProps): JSX.Element => {
       <Button
         onClick={() => setContent('4')}
         color="primary"
-        variant="outlined"
+        variant="contained"
         size="small"
         className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_4 color_4' : ''}`}
       >
@@ -147,7 +147,7 @@ const Controls = (props: ControlsProps): JSX.Element => {
       <Button
         onClick={() => setContent('5')}
         color="primary"
-        variant="outlined"
+        variant="contained"
         size="small"
         className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_5 color_5' : ''}`}
       >
@@ -156,7 +156,7 @@ const Controls = (props: ControlsProps): JSX.Element => {
       <Button
         onClick={() => setContent('6')}
         color="primary"
-        variant="outlined"
+        variant="contained"
         size="small"
         className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_6 color_6' : ''}`}
       >
@@ -174,7 +174,7 @@ const Controls = (props: ControlsProps): JSX.Element => {
       <Button
         onClick={() => setContent('7')}
         color="primary"
-        variant="outlined"
+        variant="contained"
         size="small"
         className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_7 color_7' : ''}`}
       >
@@ -183,7 +183,7 @@ const Controls = (props: ControlsProps): JSX.Element => {
       <Button
         onClick={() => setContent('8')}
         color="primary"
-        variant="outlined"
+        variant="contained"
         size="small"
         className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_8 color_8' : ''}`}
       >
@@ -192,7 +192,7 @@ const Controls = (props: ControlsProps): JSX.Element => {
       <Button
         onClick={() => setContent('9')}
         color="primary"
-        variant="outlined"
+        variant="contained"
         size="small"
         className={`btn btn_num num_${selectedMode} ${selectedMode === 'color' ? 'background_9 color_9' : ''}`}
       >

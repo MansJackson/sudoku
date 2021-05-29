@@ -1,0 +1,8 @@
+.settings {
+  margin-left: 1rem;
+  flex-grow: 1;
+}
+
+.switch_label > span {
+  font-size: .8rem;
+}

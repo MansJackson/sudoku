@@ -1,6 +1,7 @@
 import { FormGroup, FormControlLabel, Switch } from '@material-ui/core';
 import React from 'react';
 import { connect } from 'react-redux';
+import '../styles/Settings.css';
 import { dispatchA } from '../redux/actions';
 import {
   SettingsProps,
@@ -23,39 +24,48 @@ const Settings = (props: SettingsProps): JSX.Element => {
   };
 
   return (
-    <div>
+    <div className="settings">
       <FormGroup row>
         <FormControlLabel
           control={(
             <Switch
+              size="small"
               checked={highlightErrors}
               onChange={handleChange}
               name="highlightErrors"
               color="primary"
             />
           )}
+          className="switch_label"
+          color="primary"
           label="Highlight Errors"
         />
         <FormControlLabel
           control={(
             <Switch
+              size="small"
               checked={markRestricted}
               onChange={handleChange}
               name="markRestricted"
               color="primary"
             />
           )}
+          className="switch_label"
+          color="primary"
           label="Mark Restricted Cells"
         />
         <FormControlLabel
           control={(
             <Switch
+              size="small"
               checked={removePencilMarks}
               onChange={handleChange}
               name="removePencilMarks"
               color="primary"
             />
           )}
+          className="switch_label"
+          color="primary"
           label="Remove Pencil Marks"
         />
       </FormGroup>

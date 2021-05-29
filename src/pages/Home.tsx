@@ -3,13 +3,11 @@ import '../styles/Home.css';
 import Board from '../components/Board';
 import { HomeProps } from '../types';
 import Controls from '../components/Controls';
-import Settings from '../components/Settings';
+import Navbar from '../components/Navbar';
 
 const Home: React.FunctionComponent<HomeProps> = (): JSX.Element => (
   <div className="home">
-    <div className="settings">
-      <Settings />
-    </div>
+    <Navbar />
     <div className="content">
       <Board />
       <Controls />

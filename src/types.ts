@@ -21,6 +21,10 @@ export type HomeProps = {
 
 };
 
+export type NavbarProps = {
+
+};
+
 export type SettingsProps = {
   settings: {
     markRestricted: boolean,

@@ -142,7 +142,7 @@
 }
 
 .selected {
-  background-color: rgba(104, 225, 255, 0.75);
+  background-color: rgba(75, 219, 255, 0.75);
   z-index: 2;
 }
 
