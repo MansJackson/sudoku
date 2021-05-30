@@ -82,6 +82,7 @@ const Board = (props: BoardProps): JSX.Element => {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.repeat) return;
     if (!isValidNumber(e.key) && !isOtherValidKey(e.key)) return;
+    if (!selectedCells.length) return;
     e.preventDefault();
     let newBoard = [...board];
 

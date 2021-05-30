@@ -43,6 +43,16 @@ const Controls = (props: ControlsProps): JSX.Element => {
       pussle[el.parentElement!.id] = el.innerHTML;
     });
     loadPussle(false, pussle, true);
+    fetch('http://localhost:8000/sudoku', {
+      method: 'POST',
+      body: JSON.stringify({ board: pussle }),
+      headers: {
+        'content-type': 'application/json',
+      },
+    })
+      .then((res) => res.json())
+      .then((res: Record<string, any>) => console.log(res.message))
+      .catch((err) => console.error(err));
   };
 
   // Checks if pussle is correctly solved

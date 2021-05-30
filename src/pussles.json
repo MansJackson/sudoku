@@ -1,4 +1,6 @@
 {
+  "easy": [],
+  "medium": [],
   "hard": [
     {
       "addedBy": "snjacko",
@@ -29,5 +31,8 @@
         "H7": "1"
       }
     }
-  ]
+  ],
+  "extreme": [],
+  "diabolical": [],
+  "unverified": []
 }
