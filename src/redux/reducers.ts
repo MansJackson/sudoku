@@ -21,6 +21,7 @@ import {
   UPDATE_SETTINGS,
   CLEAR_ERRORS,
   UPDATE_ERRORS,
+  SET_HISTORY,
 } from '../types';
 import { updateErrors } from '../utils';
 
@@ -45,32 +46,40 @@ const historyReducer = (state = defaultHistoryState, action: HistoryAction) => {
   let filtered: Board[];
   let board: Board;
   let startIndex: number;
+  let updatedHistory: Board[] = [];
 
   switch (action.type) {
+    case SET_HISTORY:
+      return payload.history;
+
     case ADD_TO_HISTORY:
       if (state.length > 1) {
         startIndex = state.findIndex((el) => el.id === 0);
         if (startIndex > 0) {
           filtered = state.filter((_el, i) => i >= startIndex);
-          return [...filtered, { id: state.length, board: payload.board }];
+          updatedHistory = [...filtered, { id: state.length, board: payload.board }];
+          return updatedHistory;
         }
       }
+      updatedHistory = [...state, { id: state.length, board: payload.board }];
       return [...state, { id: state.length, board: payload.board }];
 
     case CLEAR_HISTORY:
-      return [{ id: state.length, board: payload.board }];
+      return [{ id: 0, board: payload.board }];
 
     case UNDO:
       if (state.length < 2) return state;
       filtered = state.filter((_el, i) => i !== state.length - 1);
       board = state[state.length - 1];
-      return [board, ...filtered];
+      updatedHistory = [board, ...filtered];
+      return updatedHistory;
 
     case REDO:
       if (state[0].id === 0) return state;
       filtered = state.filter((el) => el.id !== state[0].id);
       [board] = state;
-      return [...filtered, board];
+      updatedHistory = [...filtered, board];
+      return updatedHistory;
     default:
       return state;
   }

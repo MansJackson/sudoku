@@ -112,6 +112,7 @@ export type HistoryAction = {
   type: string;
   payload: {
     board: Cell[],
+    history: Board[],
   };
 };
 
@@ -143,6 +144,7 @@ export const SET_RESTRICTED_CELLS = 'SET_RESTRICTED_CELLS';
 export const SET_SELECTED_CELLS = 'SET_SELECTED_CELLS';
 export const SET_SELECTED_MODE = 'SET_SELECTED_MODE';
 export const TOGGLE_MODE = 'TOGGLE_MODE';
+export const SET_HISTORY = 'SET_HISTORY';
 export const ADD_TO_HISTORY = 'ADD_TO_HISTORY';
 export const CLEAR_HISTORY = 'CLEAR_HISTORY';
 export const UPDATE_SETTINGS = 'UPDATE_SETTINGS';

@@ -15,6 +15,7 @@ import {
   TOGGLE_MODE,
   SET_PUSSLE,
   ADD_TO_HISTORY,
+  SET_HISTORY,
 } from '../types';
 import Cell from './Cell';
 import {
@@ -36,15 +37,18 @@ const Board = (props: BoardProps): JSX.Element => {
     dispatch,
   } = props;
 
-  // Load an empty board on mount
+  // Load an empty board on mount and history from local storage
   useEffect(() => {
     loadPussle(true);
+    const savedHistory = window.localStorage.getItem('history');
+    if (savedHistory) dispatch(SET_HISTORY, { history: JSON.parse(savedHistory) });
     dispatch(SET_IS_LOADING, { isLoading: false });
   }, []);
 
   // Update board when history changes
   useEffect(() => {
     if (!history.length) return;
+    window.localStorage.setItem('history', JSON.stringify(history));
     dispatch(SET_PUSSLE, { cell: history[history.length - 1].board });
   }, [history]);
 
