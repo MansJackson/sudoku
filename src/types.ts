@@ -61,7 +61,7 @@ export type BoardProps = {
     removePencilMarks: boolean,
   }
   dispatch: (type: string, payload: Record<string, any>) => void;
-  loadPussle: (blank: boolean, pussle?: Record<string, string>) => void;
+  loadPussle: (blank: boolean, pussle?: Record<string, string>, userCreated?: boolean) => void;
 };
 
 export type CellProps = {

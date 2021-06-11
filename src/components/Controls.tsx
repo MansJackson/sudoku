@@ -92,9 +92,12 @@ const Controls = (props: ControlsProps): JSX.Element => {
     dispatch(SET_SELECTED_MODE, { mode });
   };
 
+  // Sets Big numbers in cells
   const setContent = (number: string) => {
     let newBoard = [...board];
-    selectedCells.forEach((el) => { newBoard = updateBoard(newBoard, el, number, selectedMode, settings.removePencilMarks); });
+    selectedCells.forEach((el) => {
+      newBoard = updateBoard(newBoard, el, number, selectedMode, settings.removePencilMarks, settings.highlightErrors);
+    });
     dispatch(ADD_TO_HISTORY, { board: newBoard });
   };
 
