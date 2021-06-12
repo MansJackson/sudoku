@@ -1,6 +1,7 @@
 export type RootState = {
   board: Cell[];
   general: {
+    pussleStarted: boolean,
     isLoading: boolean;
     selecting: boolean | null;
     mouseDown: boolean;
@@ -22,7 +23,7 @@ export type HomeProps = {
 };
 
 export type NavbarProps = {
-
+  pussleStarted: boolean,
 };
 
 export type SettingsProps = {
@@ -105,6 +106,7 @@ export type GeneralAction = {
     markRestricted: boolean,
     highlightErrors: boolean,
     removePencilMarks: boolean,
+    pussleStarted: boolean,
   };
 };
 
@@ -135,6 +137,7 @@ export type Board = {
 export type Mode = 'normal' | 'corner' | 'center' | 'color';
 
 // ACTION TYPES
+export const SET_PUSSLE_STARTED = 'SET_PUSSLE_STARTED';
 export const SET_PUSSLE = 'SET_PUSSLE';
 export const SET_IS_LOADING = 'SET_IS_LOADING';
 export const SET_SELECTING = 'SET_SELECTING';

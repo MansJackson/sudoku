@@ -9,6 +9,7 @@ import {
   Mode,
   REDO,
   RootState,
+  SET_PUSSLE_STARTED,
   SET_SELECTED_MODE,
   UNDO,
 } from '../types';
@@ -38,10 +39,13 @@ const Controls = (props: ControlsProps): JSX.Element => {
   // Locks the pussle
   const lockPussle = () => {
     const cellsToLock = document.querySelectorAll('.big_num');
+    if (!cellsToLock.length) return;
+
     const pussle: Record<string, string> = {};
     cellsToLock.forEach((el) => {
       pussle[el.parentElement!.id] = el.innerHTML;
     });
+    dispatch(SET_PUSSLE_STARTED, { pussleStarted: true });
     loadPussle(false, pussle, true);
     fetch('http://localhost:8000/sudoku', {
       method: 'POST',

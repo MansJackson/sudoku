@@ -22,12 +22,14 @@ import {
   CLEAR_ERRORS,
   UPDATE_ERRORS,
   SET_HISTORY,
+  SET_PUSSLE_STARTED,
 } from '../types';
 import { updateErrors } from '../utils';
 
 const defaultHistoryState: Board[] = [];
 const defaultBoardState: Cell[] = [];
 const defaultGeneralState = {
+  pussleStarted: false,
   isLoading: true,
   mouseDown: false,
   selecting: null,
@@ -89,6 +91,8 @@ const generalReducer = (state = defaultGeneralState, action: GeneralAction) => {
   const { payload } = action;
 
   switch (action.type) {
+    case SET_PUSSLE_STARTED:
+      return { ...state, pussleStarted: payload.pussleStarted };
     case SET_IS_LOADING:
       return { ...state, isLoading: payload.isLoading };
     case SET_SELECTING:

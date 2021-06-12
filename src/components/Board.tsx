@@ -16,6 +16,7 @@ import {
   SET_PUSSLE,
   ADD_TO_HISTORY,
   SET_HISTORY,
+  SET_PUSSLE_STARTED,
 } from '../types';
 import Cell from './Cell';
 import {
@@ -41,7 +42,10 @@ const Board = (props: BoardProps): JSX.Element => {
   useEffect(() => {
     loadPussle(true);
     const savedHistory = window.localStorage.getItem('history');
-    if (savedHistory) dispatch(SET_HISTORY, { history: JSON.parse(savedHistory) });
+    if (savedHistory) {
+      dispatch(SET_HISTORY, { history: JSON.parse(savedHistory) });
+      dispatch(SET_PUSSLE_STARTED, { pussleStarted: true });
+    }
     dispatch(SET_IS_LOADING, { isLoading: false });
   }, []);
 
