@@ -245,7 +245,7 @@ export const formatTimer = (secs: number): string => {
   remainingSecs %= 60;
 
   let formattedString = remainingSecs < 10 ? `0${remainingSecs}` : remainingSecs.toString();
-  formattedString = m < 10 ? `0${m}:${formattedString}` : `${m.toString()}:${remainingSecs}`;
+  formattedString = m < 10 ? `0${m}:${formattedString}` : `${m.toString()}:${formattedString}`;
   formattedString = `${h}:${formattedString}`;
 
   return formattedString;

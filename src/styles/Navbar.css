@@ -9,3 +9,7 @@
 .title {
   flex-grow: 1;
 }
+
+.timer {
+  width: 4rem;
+}

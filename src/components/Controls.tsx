@@ -68,6 +68,7 @@ const Controls = (props: ControlsProps): JSX.Element => {
     });
     if (isPussleSolved(pussle)) {
       alert('Congratulations!');
+      dispatch(SET_PUSSLE_STARTED, { pussleStarted: false });
     } else {
       alert('That doesn\'t look right');
     }
