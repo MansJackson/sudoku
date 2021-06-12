@@ -1,4 +1,4 @@
-import { Cell, Mode } from './types';
+import { CellT, Mode } from './types';
 
 export const isValidNumber = (input: string): boolean => (
   Number.isInteger(Number(input)) && Number(input) > 0
@@ -126,7 +126,7 @@ export const findNextCell = (cellId: string, direction: 'up' | 'down' | 'left' |
   }
 };
 
-const cellHasError = (board: Cell[], cellId: string): boolean => {
+const cellHasError = (board: CellT[], cellId: string): boolean => {
   const number = board.find((cell) => cell.id === cellId)?.bigNum;
   if (!number) return false;
 
@@ -139,19 +139,19 @@ const cellHasError = (board: Cell[], cellId: string): boolean => {
   return false;
 };
 
-export const updateErrors = (board: Cell[]): Cell[] => board.map((cell) => {
+export const updateErrors = (board: CellT[]): CellT[] => board.map((cell) => {
   if (!cellHasError(board, cell.id)) return { ...cell, error: false };
   return { ...cell, error: true };
 });
 
 export const updateBoard = (
-  state: Cell[],
+  state: CellT[],
   cellId: string,
   number: string,
   mode: Mode | 'delete' | 'restart',
   removePencils?: boolean,
   markErrors?: boolean,
-): Cell[] => {
+): CellT[] => {
   let filteredBoard = state.filter((el) => el.id !== cellId);
   let targetCell = state.find((el) => el.id === cellId);
   let restrictedCells: string[];

@@ -1,7 +1,7 @@
 import { Dispatch } from 'redux';
 import {
   ADD_TO_HISTORY,
-  Cell,
+  CellT,
   CLEAR_HISTORY,
 } from '../types';
 
@@ -9,7 +9,7 @@ export const loadPussleA = (blank: boolean, pussle?: Record<string, string>, use
   dispatch: Dispatch,
 ): void => {
   const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
-  let setup: Cell[] = [];
+  let setup: CellT[] = [];
 
   for (let x = 0; x < 9; x += 1) {
     for (let y = 1; y <= 9; y += 1) {

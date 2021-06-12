@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux';
 import {
-  Cell,
+  CellT,
   SET_PUSSLE,
   SET_IS_LOADING,
   SET_SELECTING,
@@ -16,18 +16,31 @@ import {
   ADD_TO_HISTORY,
   UNDO,
   REDO,
-  Board,
+  BoardT,
   CLEAR_HISTORY,
   UPDATE_SETTINGS,
   CLEAR_ERRORS,
   UPDATE_ERRORS,
   SET_HISTORY,
   SET_PUSSLE_STARTED,
+  SettingsT,
 } from '../types';
 import { updateErrors } from '../utils';
 
-const defaultHistoryState: Board[] = [];
-const defaultBoardState: Cell[] = [];
+const savedHistory = window.localStorage.getItem('history');
+const savedSettings = window.localStorage.getItem('settings');
+
+const parsedHistory: BoardT[] = savedHistory ? JSON.parse(savedHistory) : [];
+const parsedSettings: SettingsT = savedSettings
+  ? JSON.parse(savedSettings)
+  : {
+    markRestricted: true,
+    highlightErrors: true,
+    removePencilMarks: true,
+  };
+
+const defaultHistoryState = parsedHistory;
+const defaultBoardState: CellT[] = [];
 const defaultGeneralState = {
   pussleStarted: false,
   isLoading: true,
@@ -36,22 +49,19 @@ const defaultGeneralState = {
   mode: 'normal',
   restrictedCells: [],
   selectedCells: [],
-  settings: {
-    markRestricted: true,
-    highlightErrors: true,
-    removePencilMarks: true,
-  },
+  settings: parsedSettings,
 };
 
 const historyReducer = (state = defaultHistoryState, action: HistoryAction) => {
   const { payload } = action;
-  let filtered: Board[];
-  let board: Board;
+  let filtered: BoardT[];
+  let board: BoardT;
   let startIndex: number;
-  let updatedHistory: Board[] = [];
+  let updatedHistory: BoardT[] = [];
 
   switch (action.type) {
     case SET_HISTORY:
+      window.localStorage.setItem('history', JSON.stringify(payload.history));
       return payload.history;
 
     case ADD_TO_HISTORY:
@@ -60,13 +70,16 @@ const historyReducer = (state = defaultHistoryState, action: HistoryAction) => {
         if (startIndex > 0) {
           filtered = state.filter((_el, i) => i >= startIndex);
           updatedHistory = [...filtered, { id: state.length, board: payload.board }];
+          window.localStorage.setItem('history', JSON.stringify(updatedHistory));
           return updatedHistory;
         }
       }
       updatedHistory = [...state, { id: state.length, board: payload.board }];
-      return [...state, { id: state.length, board: payload.board }];
+      window.localStorage.setItem('history', JSON.stringify(updatedHistory));
+      return updatedHistory;
 
     case CLEAR_HISTORY:
+      window.localStorage.removeItem('history');
       return [{ id: 0, board: payload.board }];
 
     case UNDO:
@@ -74,6 +87,7 @@ const historyReducer = (state = defaultHistoryState, action: HistoryAction) => {
       filtered = state.filter((_el, i) => i !== state.length - 1);
       board = state[state.length - 1];
       updatedHistory = [board, ...filtered];
+      window.localStorage.setItem('history', JSON.stringify(updatedHistory));
       return updatedHistory;
 
     case REDO:
@@ -81,6 +95,7 @@ const historyReducer = (state = defaultHistoryState, action: HistoryAction) => {
       filtered = state.filter((el) => el.id !== state[0].id);
       [board] = state;
       updatedHistory = [...filtered, board];
+      window.localStorage.setItem('history', JSON.stringify(updatedHistory));
       return updatedHistory;
     default:
       return state;
@@ -89,6 +104,7 @@ const historyReducer = (state = defaultHistoryState, action: HistoryAction) => {
 
 const generalReducer = (state = defaultGeneralState, action: GeneralAction) => {
   const { payload } = action;
+  let updatedSettings: SettingsT;
 
   switch (action.type) {
     case SET_PUSSLE_STARTED:
@@ -114,7 +130,9 @@ const generalReducer = (state = defaultGeneralState, action: GeneralAction) => {
       if (state.mode === 'color') return { ...state, mode: 'normal' };
       return state;
     case UPDATE_SETTINGS:
-      return { ...state, settings: { ...state.settings, ...payload } };
+      updatedSettings = { ...state.settings, ...payload };
+      window.localStorage.setItem('settings', JSON.stringify(updatedSettings));
+      return { ...state, settings: updatedSettings };
     default:
       return state;
   }

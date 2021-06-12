@@ -1,20 +1,23 @@
+// States
 export type RootState = {
-  board: Cell[];
-  general: {
-    pussleStarted: boolean,
-    isLoading: boolean;
-    selecting: boolean | null;
-    mouseDown: boolean;
-    mode: Mode;
-    restrictedCells: string[];
-    selectedCells: string[];
-    settings: {
-      markRestricted: boolean,
-      highlightErrors: boolean,
-      removePencilMarks: boolean,
-    }
-  },
-  history: Board[];
+  board: CellT[];
+  general: GeneralState;
+  history: BoardT[];
+};
+
+export type GeneralState = {
+  pussleStarted: boolean;
+  isLoading: boolean;
+  selecting: boolean | null;
+  mouseDown: boolean;
+  mode: Mode;
+  restrictedCells: string[];
+  selectedCells: string[];
+  settings: {
+    markRestricted: boolean,
+    highlightErrors: boolean,
+    removePencilMarks: boolean,
+  }
 };
 
 // PROPS
@@ -23,7 +26,9 @@ export type HomeProps = {
 };
 
 export type NavbarProps = {
-  pussleStarted: boolean,
+  pussleStarted: boolean;
+  loadPussle: (blank: boolean, pussle?: Record<string, string>, userCreated?: boolean) => void;
+  dispatch: (type: string, payload: Record<string, any>) => void;
 };
 
 export type SettingsProps = {
@@ -38,8 +43,8 @@ export type SettingsProps = {
 export type ControlsProps = {
   selectedCells: string[];
   selectedMode: Mode;
-  history: Board[];
-  board: Cell[];
+  history: BoardT[];
+  board: CellT[];
   settings: {
     markRestricted: boolean,
     highlightErrors: boolean,
@@ -54,8 +59,8 @@ export type BoardProps = {
   selectedCells: string[];
   restrictedCells: string[];
   selectedMode: Mode;
-  history: Board[];
-  board: Cell[];
+  history: BoardT[];
+  board: CellT[];
   settings: {
     markRestricted: boolean,
     highlightErrors: boolean,
@@ -66,7 +71,7 @@ export type BoardProps = {
 };
 
 export type CellProps = {
-  board: Cell[];
+  board: CellT[];
   selecting: boolean | null;
   mouseDown: boolean;
   selectedCells: string[];
@@ -88,7 +93,7 @@ export type CellOwnProps = {
 export type BoardAction = {
   type: string;
   payload: {
-    cell: Cell[];
+    cell: CellT[];
     cellId: string;
     number: string;
   };
@@ -113,13 +118,13 @@ export type GeneralAction = {
 export type HistoryAction = {
   type: string;
   payload: {
-    board: Cell[],
-    history: Board[],
+    board: CellT[],
+    history: BoardT[],
   };
 };
 
 // OTHER
-export type Cell = {
+export type CellT = {
   id: string;
   locked: boolean;
   error: boolean;
@@ -129,12 +134,19 @@ export type Cell = {
   color: string;
 };
 
-export type Board = {
+export type BoardT = {
   id: number;
-  board: Cell[];
+  board: CellT[];
+};
+
+export type SettingsT = {
+  markRestricted: boolean,
+  highlightErrors: boolean,
+  removePencilMarks: boolean,
 };
 
 export type Mode = 'normal' | 'corner' | 'center' | 'color';
+export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Extreme' | 'Diabolical' | 'Blank';
 
 // ACTION TYPES
 export const SET_PUSSLE_STARTED = 'SET_PUSSLE_STARTED';
