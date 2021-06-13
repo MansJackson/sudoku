@@ -37,7 +37,7 @@ export const findRestrictedCells = (targetCells: string[]): string[] => {
 
     if (column === 'A' || column === 'B' || column === 'C') boxColumns = ['A', 'B', 'C'];
     else if (column === 'D' || column === 'E' || column === 'F') boxColumns = ['D', 'E', 'F'];
-    if (column === 'G' || column === 'H' || column === 'I') boxColumns = ['G', 'H', 'I'];
+    else if (column === 'G' || column === 'H' || column === 'I') boxColumns = ['G', 'H', 'I'];
 
     for (let x = 0; x < 3; x += 1) {
       for (let y = 0; y < 3; y += 1) {
@@ -152,12 +152,13 @@ export const updateBoard = (
   removePencils?: boolean,
   markErrors?: boolean,
 ): CellT[] => {
-  let filteredBoard = state.filter((el) => el.id !== cellId);
   let targetCell = state.find((el) => el.id === cellId);
   let restrictedCells: string[];
 
   if (targetCell?.locked) return state;
   if (!isValidNumber(number)) return state;
+
+  let filteredBoard = state.filter((el) => el.id !== cellId);
 
   switch (mode) {
     case 'corner':
@@ -196,8 +197,7 @@ export const updateBoard = (
       restrictedCells = findRestrictedCells([cellId]);
       if (removePencils) {
         filteredBoard = filteredBoard.map((cell) => {
-          if (!restrictedCells.includes(cell.id)) return cell;
-          if (cell.locked) return cell;
+          if (cell.locked || cell.bigNum || !restrictedCells.includes(cell.id)) return cell;
           const newCenter = cell.centerPencil.filter((num) => num !== number);
           const newCorner = cell.cornerPencil.filter((num) => num !== number);
           return { ...cell, cornerPencil: newCorner, centerPencil: newCenter };
@@ -206,8 +206,9 @@ export const updateBoard = (
 
       targetCell = { ...targetCell!, bigNum: number };
       if (markErrors) filteredBoard = updateErrors([...filteredBoard, targetCell]);
+      else return [...filteredBoard, targetCell];
 
-      return [...filteredBoard, targetCell];
+      return filteredBoard;
 
     case 'color':
       targetCell = { ...targetCell!, color: number };

@@ -14,6 +14,9 @@ import {
   UNDO,
 } from '../types';
 import { isPussleSolved, updateBoard } from '../utils';
+import {
+  checkLockedCandidatesPointing,
+} from '../solver';
 
 const Controls = (props: ControlsProps): JSX.Element => {
   const {
@@ -103,6 +106,15 @@ const Controls = (props: ControlsProps): JSX.Element => {
     selectedCells.forEach((el) => {
       newBoard = updateBoard(newBoard, el, number, selectedMode, settings.removePencilMarks, settings.highlightErrors);
     });
+    dispatch(ADD_TO_HISTORY, { board: newBoard });
+  };
+
+  const test = () => {
+    const newBoard = checkLockedCandidatesPointing(board);
+    if (!newBoard) {
+      console.log('no changes');
+      return;
+    }
     dispatch(ADD_TO_HISTORY, { board: newBoard });
   };
 
@@ -309,7 +321,15 @@ const Controls = (props: ControlsProps): JSX.Element => {
       >
         Lock
       </Button>
-
+      <Button
+        onClick={test}
+        color="primary"
+        variant="outlined"
+        size="small"
+        className="btn btn_extra"
+      >
+        test
+      </Button>
     </div>
   );
 };
