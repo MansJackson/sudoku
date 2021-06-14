@@ -15,7 +15,9 @@ import {
 } from '../types';
 import { isPussleSolved, updateBoard } from '../utils';
 import {
-  checkLockedCandidatesPointing,
+  checkFishes,
+  checkSubsets,
+  fillPossibleNums,
 } from '../solver';
 
 const Controls = (props: ControlsProps): JSX.Element => {
@@ -110,11 +112,16 @@ const Controls = (props: ControlsProps): JSX.Element => {
   };
 
   const test = () => {
-    const newBoard = checkLockedCandidatesPointing(board);
+    const newBoard = checkFishes(board, 2, true);
     if (!newBoard) {
       console.log('no changes');
       return;
     }
+    dispatch(ADD_TO_HISTORY, { board: newBoard });
+  };
+
+  const fillPossible = () => {
+    const newBoard = fillPossibleNums(board);
     dispatch(ADD_TO_HISTORY, { board: newBoard });
   };
 
@@ -329,6 +336,15 @@ const Controls = (props: ControlsProps): JSX.Element => {
         className="btn btn_extra"
       >
         test
+      </Button>
+      <Button
+        onClick={fillPossible}
+        color="primary"
+        variant="outlined"
+        size="small"
+        className="btn btn_extra"
+      >
+        fill
       </Button>
     </div>
   );

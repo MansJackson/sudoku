@@ -217,7 +217,7 @@ export const updateBoard = (
     case 'delete':
       if (targetCell?.locked) return state;
       targetCell = {
-        ...targetCell!, bigNum: '', cornerPencil: [], centerPencil: [],
+        ...targetCell!, bigNum: '', cornerPencil: [], centerPencil: [], error: false,
       };
       if (markErrors) filteredBoard = updateErrors(filteredBoard);
       return [...filteredBoard, targetCell];
