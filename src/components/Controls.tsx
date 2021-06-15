@@ -17,6 +17,7 @@ import { isPussleSolved, updateBoard } from '../utils';
 import {
   checkFishes,
   checkSubsets,
+  checkTwoStringKite,
   fillPossibleNums,
 } from '../solver';
 
@@ -112,7 +113,7 @@ const Controls = (props: ControlsProps): JSX.Element => {
   };
 
   const test = () => {
-    const newBoard = checkFishes(board, 2, true);
+    const newBoard = checkTwoStringKite(board);
     if (!newBoard) {
       console.log('no changes');
       return;

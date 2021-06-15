@@ -41,6 +41,58 @@ const getRowsBoxesColumns = (board: CellT[]): Record<string, CellT[][]> => {
   };
 };
 
+const getBoxIndexes = (board: CellT[], cellIds: string[]): [string, number][] => {
+  const { boxes } = getRowsBoxesColumns(board);
+  return cellIds.map((cellId) => [
+    cellId,
+    boxes.findIndex((box) => box.find(((cell) => cell.id === cellId))),
+  ]);
+};
+
+const isEmptyReectangle = (box: CellT[], num: string): string[] | false => {
+  const filteredCells = box.filter((cell) => cell.cornerPencil.includes(num));
+  const allRows = filteredCells.map((cell) => cell.id[1]);
+  const allCols = filteredCells.map((cell) => cell.id[0]);
+  // get rows and cols where {num} appears more than once
+  const duplicateRows = allRows.sort().filter((row, pos, arr) => pos && arr[pos - 1] === row);
+  const duplicateCols = allCols.sort().filter((col, pos, arr) => pos && arr[pos - 1] === col);
+
+  // if {num} appears more than once in more than one row or column, it's not an empty rectangle
+  if (duplicateCols.length > 1 || duplicateRows.length > 1) return false;
+  // if {num} does not appear more than once in any row or column, and there are more than 3 cells, it's not an empty rectangle
+  if (!duplicateCols.length && !duplicateRows.length && filteredCells.length > 2) return false;
+
+  // otherwise if {num} appears more than once in both 1 row and 1 column
+  if (duplicateCols.length && duplicateRows.length) {
+    // and there is no extra cells in the box
+    for (let i = 0; i < filteredCells.length; i += 1) {
+      if (filteredCells[i].id[0] !== duplicateCols[0] || filteredCells[i].id[1] !== duplicateRows[0]) return false;
+    }
+    // it's an empty rectangle
+    return [...duplicateCols, ...duplicateRows];
+  }
+
+  // otherwise if {num} appears more than once in either the row or the column, it's an empty rectangle
+  if (duplicateCols.length) {
+    const erRow = filteredCells.filter((cell) => cell.id[0] !== duplicateCols[0])[0].id[1];
+    return [...duplicateCols, erRow];
+  }
+
+  if (duplicateRows.length) {
+    const erCol = filteredCells.filter((cell) => cell.id[1] !== duplicateRows[0])[0].id[0];
+    return [erCol, ...duplicateRows];
+  }
+
+  // otherwise if there are only 2 conditates in the box and they both apear in diffrent rows and columns
+  // it's an empty rectangle with only 2 candidates
+  if ([...allCols, ...allRows].sort().filter((el, pos, arr) => !pos || arr[pos - 1] !== el).length === 4) {
+    return [allCols[0], allRows[1], allCols[1], allRows[0]];
+  }
+
+  // we should never get here
+  return false;
+};
+
 const checkPairs = (set: [string, string[]][], board: CellT[]): CellT[] | false => {
   if (!set.length) return false;
   let nums: string[] = [];
@@ -649,6 +701,11 @@ const checkJellyFish = (board: CellT[], sets: [string, string[]][], finned: bool
   return false;
 };
 
+/**
+ * @param board the current state of the board (has to be filled with all possible numbers)
+ * @param x the index of the seet you want to enumerate
+ * @returns [box, row, column]
+ */
 const enumSets = (board: CellT[], x: number): Record<string, string[]>[] => {
   const { boxes, rows, columns } = getRowsBoxesColumns(board);
 
@@ -1067,6 +1124,141 @@ export const checkFishes = (board: CellT[], amount: number, finned: boolean): Ce
 
     default:
       return false;
+  }
+
+  return false;
+};
+
+// 2 string kite
+export const checkTwoStringKite = (board: CellT[]): CellT[] | false => {
+  const filledBoard = fillPossibleNums(board);
+  let rows: [string, string[]][] = [];
+  let cols: [string, string[]][] = [];
+
+  // Enumerate all rows and columns where a number can only be in 2 positions
+  for (let x = 0; x < 9; x += 1) {
+    const [boxEnum, rowEnum, colEnum] = enumSets(filledBoard, x);
+
+    let asArray = Object.entries(rowEnum);
+    const filteredRowEnum = asArray.filter((el) => el[1].length === 2);
+    asArray = Object.entries(colEnum);
+    const filteredColumnEnum = asArray.filter((el) => el[1].length === 2);
+
+    if (filteredRowEnum.length && filteredRowEnum[0][1].length === 2) rows = [...rows, ...filteredRowEnum];
+    if (filteredColumnEnum.length && filteredColumnEnum[0][1].length === 2) cols = [...cols, ...filteredColumnEnum];
+  }
+  if (!rows.length || !cols.length) return false;
+
+  // Loop through all possible numbers
+  for (let n = 1; n <= 9; n += 1) {
+    // Extract only the enumerations which are specified for n
+    const filteredRows = rows.filter((el) => el[0] === String(n));
+    const filteredCols = cols.filter((el) => el[0] === String(n));
+    // Loop through each row and column
+    for (let x = 0; x < filteredRows.length; x += 1) {
+      for (let y = 0; y < filteredCols.length; y += 1) {
+        let duplicateIndex: number;
+        // Get all 4 cells from row and column
+        const cells = [...filteredRows[x][1], ...filteredCols[y][1]];
+
+        // Continue only if we are looking in 4 different cells
+        if (cells.sort().filter((el, pos, arr) => !pos || arr[pos - 1] !== el).length === 4) {
+          const boxIndexes = getBoxIndexes(board, cells);
+          // remove duplicated boxIndxes
+          const uniqIndexes = boxIndexes.map((el) => el[1]).sort().filter((el, pos, arr) => {
+            if (!pos) return true;
+            if (el !== arr[pos - 1]) return true;
+            duplicateIndex = el;
+            return false;
+          });
+
+          // if 2 of the cells are in the sam box
+          if (uniqIndexes.length === 3) {
+            let somethingChanged = false;
+            // Get cells that aren't in the same box
+            const fins = boxIndexes.filter((el) => el[1] !== duplicateIndex).map((el) => el[0]);
+            // Find the cells which can see both fins
+            const restrictedCells = findRestrictedCells(fins);
+            const newBoard = board.map((cell) => {
+              if (cell.bigNum || !restrictedCells.includes(cell.id)) return cell;
+              if (!cell.cornerPencil.includes(String(n))) return cell;
+              somethingChanged = true;
+              return { ...cell, cornerPencil: cell.cornerPencil.filter((num) => num !== String(n)) };
+            });
+            if (somethingChanged) return newBoard;
+          }
+        }
+      }
+    }
+  }
+
+  return false;
+};
+
+// empty rectangle
+export const checkEmptyRectangle = (board: CellT[]): CellT[] | false => {
+  const filledBoard = fillPossibleNums(board);
+  const { boxes } = getRowsBoxesColumns(filledBoard);
+
+  for (let i = 0; i < boxes.length; i += 1) {
+    for (let n = 1; n <= 9; n += 1) {
+      const emptyRectangle = isEmptyReectangle(boxes[i], String(n));
+      if (emptyRectangle) {
+        const [boxEnum, rowEnum, colEnum] = enumSets(filledBoard, i);
+        // regular empty rectangle
+        if (emptyRectangle.length === 2) {
+          // get row or column that of given number {n} only has 2 candidates and 1 of the candidates can bee seen by the empty rectangle
+          let asArray = Object.entries(rowEnum);
+          const filteredRowEnum = asArray.filter((el) => {
+            if (el[1].length !== 2) return false;
+            for (let c = 0; c < 2; c += 1) if (el[1][c][0] === emptyRectangle[0]) return true;
+            return false;
+          });
+
+          asArray = Object.entries(colEnum);
+          const filteredColumnEnum = asArray.filter((el) => {
+            if (el[1].length !== 2) return false;
+            for (let c = 0; c < 2; c += 1) if (el[1][c][1] === emptyRectangle[1]) return true;
+            return false;
+          });
+
+          let somethingChanged = false;
+          let fin: string;
+          let restrictedCell: string;
+          let newBoard: CellT[];
+
+          // for each candidate
+          for (let c = 0; c < filteredRowEnum.length; c += 1) {
+            if (filteredRowEnum.length) {
+              // the cell that is nt seen by the empty rectangle
+              [fin] = filteredRowEnum[c][1].filter((el) => el[0] !== emptyRectangle[0]);
+              // the cell that is restricted by empty reectangle logic
+              restrictedCell = fin[0] + emptyRectangle[1];
+              newBoard = board.map((cell) => {
+                if (cell.id !== restrictedCell) return cell;
+                if (!cell.cornerPencil.includes(String(n))) return cell;
+                somethingChanged = true;
+                return { ...cell, cornerPencil: cell.cornerPencil.filter((num) => num !== String(n)) };
+              });
+              if (somethingChanged) return newBoard;
+            }
+            if (filteredColumnEnum.length > c) {
+              [fin] = filteredColumnEnum[c][1].filter((el) => el[1] !== emptyRectangle[1]);
+              restrictedCell = emptyRectangle[0] + fin[1];
+              newBoard = board.map((cell) => {
+                if (cell.id !== restrictedCell) return cell;
+                if (!cell.cornerPencil.includes(String(n))) return cell;
+                somethingChanged = true;
+                return { ...cell, cornerPencil: cell.cornerPencil.filter((num) => num !== String(n)) };
+              });
+              if (somethingChanged) return newBoard;
+            }
+          }
+        } else {
+          // empty rectangle with only 2 candidates
+        }
+      }
+    }
   }
 
   return false;
