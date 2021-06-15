@@ -204,7 +204,7 @@ export const updateBoard = (
         });
       }
 
-      targetCell = { ...targetCell!, bigNum: number };
+      targetCell = { ...targetCell!, bigNum: number, cornerPencil: [] };
       if (markErrors) filteredBoard = updateErrors([...filteredBoard, targetCell]);
       else return [...filteredBoard, targetCell];
 

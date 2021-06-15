@@ -1,7 +1,12 @@
 import { CellT } from './types';
-import { findRestrictedCells } from './utils';
+import { findRestrictedCells, updateBoard } from './utils';
 
-const getRowsBoxesColumns = (board: CellT[]): Record<string, CellT[][]> => {
+/**
+ * Splits each row, column and box into arrays
+ * @param board current state of the board
+ * @returns - { rows, columns, boxes } => split into 1 array for each row column or box
+ */
+const getRowsBoxesColumns = (board: CellT[]): Record<'rows' | 'columns' | 'boxes', CellT[][]> => {
   const boardCopy = board.sort((a, b) => {
     if (a.id < b.id) return -1;
     if (a.id > b.id) return 1;
@@ -41,6 +46,12 @@ const getRowsBoxesColumns = (board: CellT[]): Record<string, CellT[][]> => {
   };
 };
 
+/**
+ * gets the indexes of the box that a given set of cellIds are located in
+ * @param board sudoku board
+ * @param cellIds cellIds that box indexes are required for
+ * @returns 2D array where each inner array contains a given cellId and the box index
+ */
 const getBoxIndexes = (board: CellT[], cellIds: string[]): [string, number][] => {
   const { boxes } = getRowsBoxesColumns(board);
   return cellIds.map((cellId) => [
@@ -49,6 +60,35 @@ const getBoxIndexes = (board: CellT[], cellIds: string[]): [string, number][] =>
   ]);
 };
 
+/**
+ * checks if a given set is missing exactly 1 number
+ * @param set set of cells from a box, row or column
+ * @returns [cell id, missing number] | false
+ */
+const isMissingOneNum = (set: CellT[]): string[] | false => {
+  let numsInSet: string[] = [];
+  let cellId = '';
+  set.forEach((cell) => {
+    if (cell.bigNum) numsInSet = [...numsInSet, cell.bigNum];
+    else cellId = cell.id;
+  });
+
+  if (numsInSet.length !== 8) return false;
+
+  numsInSet = numsInSet.sort();
+  for (let n = 1; n <= 9; n += 1) {
+    if (numsInSet[n - 1] !== String(n)) return [cellId, String(n)];
+  }
+
+  return false;
+};
+
+/**
+ * Checks if for a given box and number, an eempty rectangle exists
+ * @param box box to test
+ * @param num number to test
+ * @returns updated board if changes are made | false
+ */
 const isEmptyReectangle = (box: CellT[], num: string): string[] | false => {
   const filteredCells = box.filter((cell) => cell.cornerPencil.includes(num));
   const allRows = filteredCells.map((cell) => cell.id[1]);
@@ -93,7 +133,13 @@ const isEmptyReectangle = (box: CellT[], num: string): string[] | false => {
   return false;
 };
 
-const checkPairs = (set: [string, string[]][], board: CellT[]): CellT[] | false => {
+/**
+ * Checks if for a given set there is a pair
+ * @param set row, column or box
+ * @param board current state of the board
+ * @returns updated board if changes are made | false
+ */
+const checkHiddenPairs = (set: [string, string[]][], board: CellT[]): CellT[] | false => {
   if (!set.length) return false;
   let nums: string[] = [];
   let cells: string[] = [];
@@ -107,28 +153,20 @@ const checkPairs = (set: [string, string[]][], board: CellT[]): CellT[] | false 
 
       // if they can only go into 2 cells it is a pair
       if (cells.length === 2) {
-        const restrictedCells = findRestrictedCells(cells);
         let somethingChanged = false;
         const newBoard = board.map((cell) => {
           // if the pair contains pencilmarks for other numbers -> remove them
-          if (cells.includes(cell.id) && cell.cornerPencil.length > 2) {
-            somethingChanged = true;
-            return { ...cell, cornerPencil: cell.cornerPencil.filter((num) => nums.includes(num)) };
-          }
-          if (cell.bigNum || !restrictedCells.includes(cell.id)) return cell;
-          if (!cell.cornerPencil.includes(set[a][0]) || !cell.cornerPencil.includes(set[b][0])) return cell;
+          if (!cells.includes(cell.id)) return cell;
+          if (cell.cornerPencil.length < 3) return cell;
           somethingChanged = true;
-
-          return {
-            ...cell,
-            cornerPencil: cell.cornerPencil.filter((num) => (
-              num !== set[a][0]
-              && num !== set[b][0]
-            )),
-          };
+          return { ...cell, cornerPencil: cell.cornerPencil.filter((num) => nums.includes(num)) };
         });
 
-        if (somethingChanged) return newBoard;
+        if (somethingChanged) {
+          // eslint-disable-next-line
+          console.log(nums, cells);
+          return newBoard;
+        }
       }
     }
   }
@@ -136,7 +174,50 @@ const checkPairs = (set: [string, string[]][], board: CellT[]): CellT[] | false 
   return false;
 };
 
-const checkTriples = (set: [string, string[]][], board: CellT[]): CellT[] | false => {
+/**
+ * finds naked pairs in a given set of cells and updates the board appropriatly
+ * @param set set of cells from a box, column or row
+ * @param board current state of the board
+ * @returns if something was updated => updated board; else => false;
+ */
+const checkNakedPairs = (set: CellT[], board: CellT[]): CellT[] | false => {
+  const candidates = set.filter((cell) => cell.cornerPencil.length === 2);
+  if (candidates.length < 2) return false;
+  for (let a = 0; a < candidates.length; a += 1) {
+    for (let b = a + 1; b < candidates.length; b += 1) {
+      const combinedNums = [...candidates[a].cornerPencil, ...candidates[b].cornerPencil]
+        .sort()
+        .filter((num, pos, arr) => !pos || num !== arr[pos - 1]);
+      // It's a naked pair
+      if (combinedNums.length === 2) {
+        const pairedCells = [candidates[a].id, candidates[b].id];
+        const restrictedCells = findRestrictedCells(pairedCells);
+        let somethingChanged = false;
+        const newBoard = board.map((cell) => {
+          if (cell.bigNum) return cell;
+          if (!restrictedCells.includes(cell.id)) return cell;
+          if (!cell.cornerPencil.includes(combinedNums[0]) && !cell.cornerPencil.includes(combinedNums[1])) return cell;
+          somethingChanged = true;
+          return { ...cell, cornerPencil: cell.cornerPencil.filter((num) => !combinedNums.includes(num)) };
+        });
+        if (somethingChanged) {
+          console.log(pairedCells, combinedNums);
+          return newBoard;
+        }
+      }
+    }
+  }
+
+  return false;
+};
+
+/**
+ * Checks if for a given set there is a triple
+ * @param set row, column or box
+ * @param board current state of the board
+ * @returns updated board if changes are made | false
+ */
+const checkHiddenTriples = (set: [string, string[]][], board: CellT[]): CellT[] | false => {
   if (!set.length) return false;
   let nums: string[] = [];
   let cells: string[] = [];
@@ -147,37 +228,27 @@ const checkTriples = (set: [string, string[]][], board: CellT[]): CellT[] | fals
         // The numbers we are looking for
         nums = [set[a][0], set[b][0], set[c][0]];
         // All the cells theese number can go into in this set
-        cells = [...set[a][1], ...set[b][1], ...set[c][1]].sort().filter((el, pos, arr) => pos === 0 || el !== arr[pos - 1]);
+        cells = [...set[a][1], ...set[b][1], ...set[c][1]].sort().filter((el, pos, arr) => !pos || el !== arr[pos - 1]);
 
         // if they can only go into 3 cells it is a triple
         if (cells.length === 3) {
-          const restrictedCells = findRestrictedCells(cells);
           let somethingChanged = false;
           const newBoard = board.map((cell) => {
             // if the triple contains pencilmarks for other numbers -> remove them
-            if (cells.includes(cell.id) && cell.cornerPencil.length > 3) {
-              somethingChanged = true;
-              return { ...cell, cornerPencil: cell.cornerPencil.filter((num) => nums.includes(num)) };
+            if (!cells.includes(cell.id)) return cell;
+            for (let i = 0; i < cell.cornerPencil.length; i += 1) {
+              if (!nums.includes(cell.cornerPencil[i])) {
+                somethingChanged = true;
+                return { ...cell, cornerPencil: cell.cornerPencil.filter((num) => nums.includes(num)) };
+              }
             }
-            if (cell.bigNum || !restrictedCells.includes(cell.id)) return cell;
-            if (
-              !cell.cornerPencil.includes(set[a][0])
-              || !cell.cornerPencil.includes(set[b][0])
-              || !cell.cornerPencil.includes(set[c][0])
-            ) return cell;
-            somethingChanged = true;
-
-            return {
-              ...cell,
-              cornerPencil: cell.cornerPencil.filter((num) => (
-                num !== set[a][0]
-                && num !== set[b][0]
-                && num !== set[c][0]
-              )),
-            };
+            return cell;
           });
 
-          if (somethingChanged) return newBoard;
+          if (somethingChanged) {
+            console.log(nums, cells, [...set[a][1], ...set[b][1], ...set[c][1]]);
+            return newBoard;
+          }
         }
       }
     }
@@ -186,7 +257,60 @@ const checkTriples = (set: [string, string[]][], board: CellT[]): CellT[] | fals
   return false;
 };
 
-const checkQuads = (set: [string, string[]][], board: CellT[]): CellT[] | false => {
+/**
+ * finds naked triples in a given set of cells and updates the board appropriatly
+ * @param set set of cells from a box, column or row
+ * @param board current state of the board
+ * @returns if something was updated => updated board; else => false;
+ */
+const checkNakedTriples = (set: CellT[], board: CellT[]): CellT[] | false => {
+  const candidates = set.filter((cell) => cell.cornerPencil.length <= 3 && cell.cornerPencil.length > 1);
+  if (candidates.length < 3) return false;
+  for (let a = 0; a < candidates.length; a += 1) {
+    for (let b = a + 1; b < candidates.length; b += 1) {
+      for (let c = b + 1; c < candidates.length; c += 1) {
+        const combinedNums = [
+          ...candidates[a].cornerPencil,
+          ...candidates[b].cornerPencil,
+          ...candidates[c].cornerPencil,
+        ]
+          .sort()
+          .filter((num, pos, arr) => !pos || num !== arr[pos - 1]);
+        // It's a naked triple
+        if (combinedNums.length === 3) {
+          const pairedCells = [candidates[a].id, candidates[b].id, candidates[c].id];
+          const restrictedCells = findRestrictedCells(pairedCells);
+          let somethingChanged = false;
+          const newBoard = board.map((cell) => {
+            if (cell.bigNum) return cell;
+            if (!restrictedCells.includes(cell.id)) return cell;
+            if (
+              !cell.cornerPencil.includes(combinedNums[0])
+              && !cell.cornerPencil.includes(combinedNums[1])
+              && !cell.cornerPencil.includes(combinedNums[2])
+            ) return cell;
+            somethingChanged = true;
+            return { ...cell, cornerPencil: cell.cornerPencil.filter((num) => !combinedNums.includes(num)) };
+          });
+          if (somethingChanged) {
+            console.log(pairedCells, combinedNums);
+            return newBoard;
+          }
+        }
+      }
+    }
+  }
+
+  return false;
+};
+
+/**
+ * Checks if for a given set there is a quadruple
+ * @param set row, column or box
+ * @param board current state of the board
+ * @returns updated board if changes are made | false
+ */
+const checkHiddenQuads = (set: [string, string[]][], board: CellT[]): CellT[] | false => {
   if (!set.length) return false;
   let nums: string[] = [];
   let cells: string[] = [];
@@ -202,35 +326,23 @@ const checkQuads = (set: [string, string[]][], board: CellT[]): CellT[] | false 
 
           // if they can only go into 4 cells it is a quad
           if (cells.length === 4) {
-            const restrictedCells = findRestrictedCells(cells);
             let somethingChanged = false;
             const newBoard = board.map((cell) => {
               // if the quad contains pencilmarks for other numbers -> remove them
-              if (cells.includes(cell.id) && cell.cornerPencil.length > 4) {
-                somethingChanged = true;
-                return { ...cell, cornerPencil: cell.cornerPencil.filter((num) => nums.includes(num)) };
+              if (!cells.includes(cell.id)) return cell;
+              for (let i = 0; i < cell.cornerPencil.length; i += 1) {
+                if (!nums.includes(cell.cornerPencil[i])) {
+                  somethingChanged = true;
+                  return { ...cell, cornerPencil: cell.cornerPencil.filter((num) => nums.includes(num)) };
+                }
               }
-              if (cell.bigNum || !restrictedCells.includes(cell.id)) return cell;
-              if (
-                !cell.cornerPencil.includes(set[a][0])
-                || !cell.cornerPencil.includes(set[b][0])
-                || !cell.cornerPencil.includes(set[c][0])
-                || !cell.cornerPencil.includes(set[d][0])
-              ) return cell;
-              somethingChanged = true;
-
-              return {
-                ...cell,
-                cornerPencil: cell.cornerPencil.filter((num) => (
-                  num !== set[a][0]
-                  && num !== set[b][0]
-                  && num !== set[c][0]
-                  && num !== set[d][0]
-                )),
-              };
+              return cell;
             });
 
-            if (somethingChanged) return newBoard;
+            if (somethingChanged) {
+              console.log(nums, cells);
+              return newBoard;
+            }
           }
         }
       }
@@ -240,6 +352,64 @@ const checkQuads = (set: [string, string[]][], board: CellT[]): CellT[] | false 
   return false;
 };
 
+/**
+ * finds naked quads in a given set of cells and updates the board appropriatly
+ * @param set set of cells from a box, column or row
+ * @param board current state of the board
+ * @returns if something was updated => updated board; else => false;
+ */
+const checkNakedQuads = (set: CellT[], board: CellT[]): CellT[] | false => {
+  const candidates = set.filter((cell) => cell.cornerPencil.length <= 4 && cell.cornerPencil.length > 1);
+  if (candidates.length < 4) return false;
+  for (let a = 0; a < candidates.length; a += 1) {
+    for (let b = a + 1; b < candidates.length; b += 1) {
+      for (let c = b + 1; c < candidates.length; c += 1) {
+        for (let d = c + 1; d < candidates.length; d += 1) {
+          const combinedNums = [
+            ...candidates[a].cornerPencil,
+            ...candidates[b].cornerPencil,
+            ...candidates[c].cornerPencil,
+            ...candidates[d].cornerPencil,
+          ]
+            .sort()
+            .filter((num, pos, arr) => !pos || num !== arr[pos - 1]);
+          // It's a naked triple
+          if (combinedNums.length === 4) {
+            const pairedCells = [candidates[a].id, candidates[b].id, candidates[c].id, candidates[d].id];
+            const restrictedCells = findRestrictedCells(pairedCells);
+            let somethingChanged = false;
+            const newBoard = board.map((cell) => {
+              if (cell.bigNum) return cell;
+              if (!restrictedCells.includes(cell.id)) return cell;
+              if (
+                !cell.cornerPencil.includes(combinedNums[0])
+                && !cell.cornerPencil.includes(combinedNums[1])
+                && !cell.cornerPencil.includes(combinedNums[2])
+                && !cell.cornerPencil.includes(combinedNums[3])
+              ) return cell;
+              somethingChanged = true;
+              return { ...cell, cornerPencil: cell.cornerPencil.filter((num) => !combinedNums.includes(num)) };
+            });
+            if (somethingChanged) {
+              console.log(pairedCells, combinedNums);
+              return newBoard;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return false;
+};
+
+/**
+ * Checks if for given rows or columns an X-Wing exists
+ * @param board current state of the board
+ * @param sets all possible candidates for rows OR columns (not both at the same time)
+ * @param finned check for finned or regular X-Wings?
+ * @returns updated board if changes are made | false
+ */
 const checkXWing = (board: CellT[], sets: [string, string[]][], finned: boolean): CellT[] | false => {
   let rows: string[] = [];
   let columns: string[] = [];
@@ -364,6 +534,13 @@ const checkXWing = (board: CellT[], sets: [string, string[]][], finned: boolean)
   return false;
 };
 
+/**
+ * Checks if for given rows or columns a Sword Fish exists
+ * @param board current state of the board
+ * @param sets all possible candidates for rows OR columns (not both at the same time)
+ * @param finned check for finned or regular Sword Fishes?
+ * @returns updated board if changes are made | false
+ */
 const checkSwordFish = (board: CellT[], sets: [string, string[]][], finned: boolean): CellT[] | false => {
   let rows: string[] = [];
   let columns: string[] = [];
@@ -525,6 +702,13 @@ const checkSwordFish = (board: CellT[], sets: [string, string[]][], finned: bool
   return false;
 };
 
+/**
+ * Checks if for given rows or columns a Jelly Fish exists
+ * @param board current state of the board
+ * @param sets all possible candidates for rows OR columns (not both at the same time)
+ * @param finned check for finned or regular Jelly Fishes?
+ * @returns updated board if changes are made | false
+ */
 const checkJellyFish = (board: CellT[], sets: [string, string[]][], finned: boolean): CellT[] | false => {
   let rows: string[] = [];
   let columns: string[] = [];
@@ -702,9 +886,10 @@ const checkJellyFish = (board: CellT[], sets: [string, string[]][], finned: bool
 };
 
 /**
- * @param board the current state of the board (has to be filled with all possible numbers)
- * @param x the index of the seet you want to enumerate
- * @returns [box, row, column]
+ * Enumerates how many candidates there are for each number in a given row, column or box
+ * @param board current state of the board (has to be filled with all possible numbers)
+ * @param x index of the set you want to enumerate
+ * @returns [box, row, column] => objects where the key is the number and the value is an array of the cells it can go into
  */
 const enumSets = (board: CellT[], x: number): Record<string, string[]>[] => {
   const { boxes, rows, columns } = getRowsBoxesColumns(board);
@@ -732,7 +917,10 @@ const enumSets = (board: CellT[], x: number): Record<string, string[]>[] => {
   return [boxEnum, rowEnum, columnEnum];
 };
 
-// Fill all possibilities
+/** Fill all possibilities for each cell in a given board
+ * @param board current state of the board
+ * @returns board with the possible numbers added to cornerPencil property
+ */
 export const fillPossibleNums = (board: CellT[]): CellT[] => board.map((cell) => {
   if (cell.bigNum) return { ...cell, cornerPencil: [] };
   const restrictedCells = board.filter((el) => findRestrictedCells([cell.id]).includes(el.id));
@@ -748,49 +936,34 @@ export const fillPossibleNums = (board: CellT[]): CellT[] => board.map((cell) =>
   return { ...cell, cornerPencil: possibleNums, centerPencil: [] };
 });
 
-// Full House
+/**
+ * Checks boxes rows and columns for a full house
+ * @param board current state of the board
+ * @returns updated state of the board | false
+ */
 export const checkFullHouse = (board: CellT[]): CellT[] | false => {
-  let boardCopy = [...board];
-  const { boxes } = getRowsBoxesColumns(board);
+  const { boxes, rows, columns } = getRowsBoxesColumns(board);
+  const sets = [boxes, rows, columns];
 
-  // Loop through each box
+  // Loop through each set
   for (let x = 0; x < 9; x += 1) {
-    let counter = 0;
-    let cellId = '';
-    let usedNums: string[] = [];
-
-    // Loop through each cell
-    for (let y = 0; y < 9; y += 1) {
-      // If cell does not have a number filled
-      if (!boxes[x][y].bigNum) {
-        cellId = boxes[x][y].id;
-        counter += 1;
-      } else {
-        usedNums = [...usedNums, boxes[x][y].bigNum];
+    for (let c = 0; c < 3; c += 1) {
+      const result = isMissingOneNum(sets[c][x]);
+      if (result) {
+        const [cellId, num] = result;
+        return updateBoard(board, cellId, num, 'normal', true);
       }
-    }
-
-    // If only 1 cell in the box does not contain a number
-    if (counter === 1) {
-      let notUsedNum = '';
-
-      // Check which numbers are used in box
-      for (let i = 1; i <= 9; i += 1) {
-        if (!usedNums.includes(i.toString())) notUsedNum = i.toString();
-      }
-
-      const targetCell = boardCopy.find((el) => el.id === cellId);
-      boardCopy = board.filter((el) => el.id !== cellId);
-      boardCopy = [...boardCopy, { ...targetCell!, bigNum: notUsedNum }];
-
-      return boardCopy;
     }
   }
 
   return false;
 };
 
-// Naked Singles
+/**
+ * check cells for a naked single (Double check)
+ * @param board current state of the board
+ * @returns updated state of the board | false
+ */
 export const checkNakedSingles = (board: CellT[]): CellT[] | false => {
   let boardCopy = [...board];
   boardCopy = fillPossibleNums(board);
@@ -810,7 +983,11 @@ export const checkNakedSingles = (board: CellT[]): CellT[] | false => {
   return false;
 };
 
-// Hidden Singles
+/**
+ * checks cells for a hidden single (Double check)
+ * @param board current state of the board
+ * @returns updated state of the board | false
+ */
 export const checkHiddenSingles = (board: CellT[]): CellT[] | false => {
   let boardCopy = [...board];
   boardCopy = fillPossibleNums(boardCopy);
@@ -1025,20 +1202,18 @@ export const checkLockedCandidatesClaiming = (board: CellT[]): CellT[] | false =
 };
 
 // Subsets "Look into recursion"
-export const checkSubsets = (board: CellT[], amount: number): CellT[] | false => {
-  const filledBoard = fillPossibleNums(board);
-
+export const checkHiddenSubsets = (board: CellT[], amount: number): CellT[] | false => {
   // Loop through each box row and column
   for (let x = 0; x < 9; x += 1) {
-    const [boxEnum, rowEnum, columnEnum] = enumSets(filledBoard, x);
+    const [boxEnum, rowEnum, columnEnum] = enumSets(board, x);
 
     // convert enumerated objects to arrays and filter out results with to many hits
     let asArray = Object.entries(boxEnum);
-    const filteredBoxEnum = asArray.filter((el) => el[1].length <= amount);
+    const filteredBoxEnum = asArray.filter(([_num, cells]) => cells.length <= amount && cells.length > 1);
     asArray = Object.entries(rowEnum);
-    const filteredRowEnum = asArray.filter((el) => el[1].length <= amount);
+    const filteredRowEnum = asArray.filter(([_num, cells]) => cells.length <= amount && cells.length > 1);
     asArray = Object.entries(columnEnum);
-    const filteredColumnEnum = asArray.filter((el) => el[1].length <= amount);
+    const filteredColumnEnum = asArray.filter(([_num, cells]) => cells.length <= amount && cells.length > 1);
     const filteredEnums = [filteredBoxEnum, filteredRowEnum, filteredColumnEnum];
 
     let result: CellT[] | false;
@@ -1046,15 +1221,48 @@ export const checkSubsets = (board: CellT[], amount: number): CellT[] | false =>
     for (let c = 0; c < filteredEnums.length; c += 1) {
       switch (amount) {
         case 2:
-          result = checkPairs(filteredEnums[c], board);
+          result = checkHiddenPairs(filteredEnums[c], board);
           if (result) return result;
           break;
         case 3:
-          result = checkTriples(filteredEnums[c], board);
+          result = checkHiddenTriples(filteredEnums[c], board);
           if (result) return result;
           break;
         case 4:
-          result = checkQuads(filteredEnums[c], board);
+          result = checkHiddenQuads(filteredEnums[c], board);
+          if (result) return result;
+          break;
+        default:
+          return false;
+      }
+    }
+  }
+
+  return false;
+};
+
+export const checkNakedSubsets = (board: CellT[], amount: number): CellT[] | false => {
+  const { boxes, columns, rows } = getRowsBoxesColumns(board);
+
+  for (let i = 0; i < 9; i += 1) {
+    const filteredBoxes = boxes[i].filter((cell) => cell.cornerPencil.length <= amount && cell.cornerPencil.length > 1);
+    const filteredRows = rows[i].filter((cell) => cell.cornerPencil.length <= amount && cell.cornerPencil.length > 1);
+    const filteredColumns = columns[i].filter((cell) => cell.cornerPencil.length <= amount && cell.cornerPencil.length > 1);
+
+    const filteredSets = [filteredBoxes, filteredRows, filteredColumns];
+    for (let c = 0; c < 3; c += 1) {
+      let result: CellT[] | false = false;
+      switch (amount) {
+        case 2:
+          result = checkNakedPairs(filteredSets[c], board);
+          if (result) return result;
+          break;
+        case 3:
+          result = checkNakedTriples(filteredSets[c], board);
+          if (result) return result;
+          break;
+        case 4:
+          result = checkNakedQuads(filteredSets[c], board);
           if (result) return result;
           break;
         default:
