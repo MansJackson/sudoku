@@ -15,10 +15,8 @@ import {
 } from '../types';
 import { isPussleSolved, updateBoard } from '../utils';
 import {
-  checkFullHouse,
-  checkHiddenSubsets,
-  checkNakedSubsets,
   fillPossibleNums,
+  solve,
 } from '../solver';
 
 const Controls = (props: ControlsProps): JSX.Element => {
@@ -113,10 +111,15 @@ const Controls = (props: ControlsProps): JSX.Element => {
   };
 
   const test = () => {
-    const newBoard = checkFullHouse(board);
+    const { board: newBoard, steps } = solve(board);
+    // const newBoard = checkHiddenSubsets(board, 2);
     if (!newBoard) {
       console.log('no changes');
       return;
+    }
+    if (steps.length) {
+      const points = steps.map((step) => step.points).reduce((a, b) => a + b);
+      console.log(steps, points);
     }
     dispatch(ADD_TO_HISTORY, { board: newBoard });
   };

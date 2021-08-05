@@ -136,6 +136,8 @@ export type CellT = {
 
 export type BoardT = {
   id: number;
+  title?: string;
+  description?: string;
   board: CellT[];
 };
 
@@ -147,6 +149,26 @@ export type SettingsT = {
 
 export type Mode = 'normal' | 'corner' | 'center' | 'color';
 export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Extreme' | 'Diabolical' | 'Blank';
+export type TStep = {
+  type: 'fh' | 'hs' | 'ns' | 'hp' | 'np' | 'lcp' | 'lcc' | 'ss' | 'xw' | 'xyw' | 'xyz'
+  | 'ww' | 'ssc' | 'fxw' | 'ht' | 'nt' | 'er' | 'hq' | 'nq' | 'sf' | 'fsf' | 'jf' | 'fjf';
+  points: number;
+  affectedNumbers: string[];
+  affectedCells: string[];
+  sourceCells?: string[];
+  set?: string;
+  fins?: string[];
+  sashimi?: boolean;
+};
+export type TSpecs = {
+  affectedNumbers: string[];
+  affectedCells: string[];
+  sourceCells?: string[];
+  set?: string;
+  fins?: string[];
+  sashimi?: boolean;
+};
+export const setTypes = ['box', 'row', 'column'];
 
 // ACTION TYPES
 export const SET_PUSSLE_STARTED = 'SET_PUSSLE_STARTED';
