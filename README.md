@@ -20,10 +20,10 @@ THere is also a built in solver
 * run `npm install && npm start`
 
 ## Future developments/improvements
-* Finnish the solver (more advanced techniques)
-* A way to step through the computers solve and show explanations for each step
+* Finish the solver (more advanced techniques)
+* Step through the computers solve and show explanations for each step
 * Generating random pussles
 * Mobile version
-* Add accounts to save and manage pussles
-* Diffrent sudoku variant e.g. Killer, Arrow, Thermo
+* Accounts, to save, manage and share pussles
+* Diffrent sudoku variants e.g. Killer, Arrow, Thermo
 * A custom build tool for pussle creators to work with
