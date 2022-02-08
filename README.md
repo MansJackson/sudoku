@@ -21,7 +21,7 @@ THere is also a built in solver
 
 ## Future developments/improvements
 * Finnish the solver (more advanced techniques)
-* A way to step through the computers solve and show explinations for each step
+* A way to step through the computers solve and show explanations for each step
 * Generating random pussles
 * Mobile version
 * Add accounts to save and manage pussles
