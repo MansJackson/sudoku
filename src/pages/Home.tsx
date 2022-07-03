@@ -1,7 +1,7 @@
 import React from 'react';
 import '../styles/Home.css';
 import Board from '../components/Board';
-import { HomeProps } from '../types';
+import { HomeProps } from '../lib/types';
 import Controls from '../components/Controls';
 import Navbar from '../components/Navbar';
 

@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { dispatchA } from '../redux/actions';
 import {
   CellOwnProps, CellProps, RootState, SET_MOUSE_DOWN, SET_SELECTED_CELLS, SET_SELECTING,
-} from '../types';
+} from '../lib/types';
 
 const Cell: React.FunctionComponent<CellProps & CellOwnProps> = (
   props: CellProps & CellOwnProps,

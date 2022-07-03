@@ -25,6 +25,10 @@ export type HomeProps = {
 
 };
 
+export type NumpadProps = {
+
+};
+
 export type NavbarProps = {
   pussleStarted: boolean;
   loadPussle: (blank: boolean, pussle?: Record<string, string>, userCreated?: boolean) => void;

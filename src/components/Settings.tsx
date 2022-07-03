@@ -7,7 +7,7 @@ import {
   SettingsProps,
   RootState,
   UPDATE_SETTINGS,
-} from '../types';
+} from '../lib/types';
 
 const Settings = (props: SettingsProps): JSX.Element => {
   const {

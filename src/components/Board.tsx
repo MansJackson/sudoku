@@ -17,12 +17,12 @@ import {
   ADD_TO_HISTORY,
   SET_PUSSLE_STARTED,
   CellT,
-} from '../types';
+} from '../lib/types';
 import Cell from './Cell';
 import {
   findNextCell,
   findRestrictedCells, isOtherValidKey, isValidNumber, updateBoard,
-} from '../utils';
+} from '../lib/utils';
 
 const Board = (props: BoardProps): JSX.Element => {
   const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];

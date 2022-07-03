@@ -24,8 +24,8 @@ import {
   SET_HISTORY,
   SET_PUSSLE_STARTED,
   SettingsT,
-} from '../types';
-import { updateErrors } from '../utils';
+} from '../lib/types';
+import { updateErrors } from '../lib/utils';
 
 const savedHistory = window.localStorage.getItem('history');
 const savedSettings = window.localStorage.getItem('settings');

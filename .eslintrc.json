@@ -41,6 +41,7 @@
         "max-len": ["error", 150],
         "linebreak-style": 0,
         "@typescript-eslint/no-unsafe-member-access": 0,
-        "@typescript-eslint/no-loop-func": 0
+        "@typescript-eslint/no-loop-func": 0,
+        "import/prefer-default-export": 0
     }
 }

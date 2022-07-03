@@ -3,7 +3,7 @@ import {
   ADD_TO_HISTORY,
   CellT,
   CLEAR_HISTORY,
-} from '../types';
+} from '../lib/types';
 
 export const loadPussleA = (blank: boolean, pussle?: Record<string, string>, userCreated?: boolean) => (
   dispatch: Dispatch,

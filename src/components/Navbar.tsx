@@ -10,8 +10,8 @@ import {
   NavbarProps,
   RootState,
   SET_PUSSLE_STARTED,
-} from '../types';
-import { formatTimer } from '../utils';
+} from '../lib/types';
+import { formatTimer } from '../lib/formatter';
 import Settings from './Settings';
 
 const Navbar: React.FunctionComponent<NavbarProps> = (props): JSX.Element => {

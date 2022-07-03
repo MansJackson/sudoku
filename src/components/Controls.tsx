@@ -12,12 +12,12 @@ import {
   SET_PUSSLE_STARTED,
   SET_SELECTED_MODE,
   UNDO,
-} from '../types';
-import { isPussleSolved, updateBoard } from '../utils';
+} from '../lib/types';
+import { isPussleSolved, updateBoard } from '../lib/utils';
 import {
   fillPossibleNums,
   solve,
-} from '../solver';
+} from '../lib/solver';
 
 const Controls = (props: ControlsProps): JSX.Element => {
   const {
@@ -59,8 +59,7 @@ const Controls = (props: ControlsProps): JSX.Element => {
       },
     })
       .then((res) => res.json())
-      .then((res: Record<string, any>) => console.log(res.message))
-      .catch((err) => console.error(err));
+      .catch((err) => err as Error);
   };
 
   // Checks if pussle is correctly solved
@@ -114,12 +113,10 @@ const Controls = (props: ControlsProps): JSX.Element => {
     const { board: newBoard, steps } = solve(board);
     // const newBoard = checkHiddenSubsets(board, 2);
     if (!newBoard) {
-      console.log('no changes');
       return;
     }
     if (steps.length) {
       const points = steps.map((step) => step.points).reduce((a, b) => a + b);
-      console.log(steps, points);
     }
     dispatch(ADD_TO_HISTORY, { board: newBoard });
   };
